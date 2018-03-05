@@ -1,6 +1,6 @@
 {
   "name": "@theosdev/logos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Logos is a Perl regex-based preprocessor that simplifies the boilerplate code needed to create hooks for Objective-C methods and C functions with an elegant Objective-C-like syntax.",
   "author": "Theos",
   "license": "GPL-3.0",
@@ -22,7 +22,8 @@
   ],
 
   "bin": {
-    "logos.pl": "logos.pl",
-    "logos": "logos.pl"
+    "logos": "bin/logos.pl",
+    "logos.pl": "bin/logos.pl",
+    "logify": "bin/logify.pl"
   }
 }
