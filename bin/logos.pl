@@ -4,7 +4,7 @@ use 5.006;
 use warnings;
 use strict;
 use FindBin;
-use lib "$FindBin::Bin/lib";
+use lib "$FindBin::RealBin/lib";
 use Digest::MD5 'md5_hex';
 use Module::Load;
 use Module::Load::Conditional 'can_load';
