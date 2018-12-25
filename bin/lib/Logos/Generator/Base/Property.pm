@@ -31,18 +31,18 @@ sub definition {
 	my $getter_func = "__attribute__((used)) "; # If the property is never accessed, clang's optimizer will remove the getter/setter if this attribute isn't specified
 	$getter_func .= "static $propertyType $propertyGetterName($propertyClass * __unused self, SEL __unused _cmd) ";
 	if($wrapValue) {
-		$getter_func .= "{ NSValue * value = objc_getAssociatedObject(self, $propertyGetterName); $propertyType rawValue; [value getValue:&rawValue]; return rawValue; }";
+		$getter_func .= "{ NSValue * value = objc_getAssociatedObject(self, (void *)$propertyGetterName); $propertyType rawValue; [value getValue:&rawValue]; return rawValue; }";
 	} else {
-		$getter_func .= "{ return ($propertyType)objc_getAssociatedObject(self, $propertyGetterName); }";
+		$getter_func .= "{ return ($propertyType)objc_getAssociatedObject(self, (void *)$propertyGetterName); }";
 	}
 
 	# Build setter
 	my $setter_func = "__attribute__((used)) "; # If the property is never accessed, clang's optimizer will remove the getter/setter if this attribute isn't specified
 	$setter_func .= "static void $propertySetterName($propertyClass * __unused self, SEL __unused _cmd, $propertyType rawValue) ";
 	if($wrapValue) {
-		$setter_func .= "{ NSValue * value = [NSValue valueWithBytes:&rawValue objCType:\@encode($propertyType)]; objc_setAssociatedObject(self, $propertyGetterName, value, OBJC_ASSOCIATION_RETAIN_NONATOMIC); }";
+		$setter_func .= "{ NSValue * value = [NSValue valueWithBytes:&rawValue objCType:\@encode($propertyType)]; objc_setAssociatedObject(self, (void *)$propertyGetterName, value, OBJC_ASSOCIATION_RETAIN_NONATOMIC); }";
 	} else {
-		$setter_func .= "{ objc_setAssociatedObject(self, $propertyGetterName, rawValue, $propertyAssociationPolicy); }";
+		$setter_func .= "{ objc_setAssociatedObject(self, (void *)$propertyGetterName, rawValue, $propertyAssociationPolicy); }";
 	}
 
 	return "$getter_func; $setter_func";
