@@ -55,7 +55,7 @@ sub scanStringLiteral {
 
     # Case: has escaped quotes
     while (distanceToPattern('\\"') != -1 &&
-        distanceToPattern('\\"') < distanceToPattern('[^\\]"')) {
+        distanceToPattern('\\"') < distanceToPattern('[^\\]]"')) {
             # Scan escaped quote
             scanUpToPattern('\\"');
             scanPattern('\\"');
@@ -65,6 +65,22 @@ sub scanStringLiteral {
     unless (scanUpToPattern('"') && scanPattern('"')) { $pos = $_start; return 0; };
 
     return 1;
+}
+
+sub insideString {
+    my $_start = $pos;
+    $pos = 0;
+
+    # While we're behind our spot...
+    while ($pos++ < $_start) {
+        # Can we scan a string and moved past our spot?
+        if (scanStringLiteral() && $pos >= $_start) {
+            $pos = $_start;
+            return 1;
+        }
+    }
+
+    { $pos = $_start; return 0; };
 }
 
 sub scanBracePair {
@@ -80,7 +96,8 @@ sub scanBracePair {
     while (distanceToPattern($open) != -1 &&
         distanceToPattern($open) < distanceToPattern($close)) {
             # Scan inner pair of brackets
-            scanMethodCall();
+            scanUpToPattern($open);
+            scanBracePair($open, $close);
         }
 
     # Scan closing bracket
@@ -179,7 +196,7 @@ sub scanObjectBehindCursor() {
         # We will first find `foo.bar` out of `[foo.bar baz].%whatever`.
         # We would need to keep going back until we hit `[foo.bar baz]` entirely.
         my $preScanPos = $pos;
-        if (scanObjectToken() && $pos == $oldPos) {
+        if ((scanObjectToken() || scanParenthesis()) && $pos == $oldPos) {
             my $obj = substr($_line, $preScanPos, $pos - $preScanPos);
 
             # Skip over leading whitespace
@@ -203,23 +220,94 @@ sub scanObjectBehindCursor() {
     { $pos = $_start; return 0; };
 }
 
+# Leaves cursor just before the .%
+# Returns (key, object, range.loc, range.length)
+sub scanKVCKeyAndObjectAndLengths() {
+    my $postKVCPos = $pos;
+    my $preKVCPos = $pos - 2;
+    my $key = undef;
+    my $keyLength = undef;
+
+    # Case: foo.%bar
+    if (scanIdentifier()) {
+        # Scan the "key" and surround it in @"" quotes
+        $key = substr($_line, $postKVCPos, $pos - $postKVCPos);
+        $keyLength = length($key); # for range to replace
+        $key = '@"' . $key . '"';
+    }
+    # Case: foo.%(...)
+    elsif (scanParenthesis()) {
+        # Scan the "key" which could be anything
+        $key = substr($_line, $postKVCPos, $pos - $postKVCPos);
+        $keyLength = length($key);
+    }
+
+    # Case: setter syntax: ' = (stuff);'
+    my $setterPattern = '\s*=\s*([^;]+);';
+    my $val = undef;
+    my $setterLength = 0;
+    if (scanUpToPattern($setterPattern)) {
+        if (substr($_line, $pos) =~ /^($setterPattern)/) {
+            $val = $2;
+            $setterLength = length($1) - 1; # we don't want the ';'
+        }
+    }
+
+    # Back up to before the key
+    $pos = $preKVCPos;
+
+    # Scan the "object"
+    my $object = scanObjectBehindCursor();
+    my $objLength = length($object);
+
+    # Compute range to replace (loc, len)
+    # Length is target.length + len(".%") + key.length
+    my $loc = $pos - $objLength;
+    my $len = $objLength + 2 + $keyLength + $setterLength;
+
+    # Scan past the .%
+    $pos = $postKVCPos;
+
+    return ($key, $object, $val, $loc, $len);
+}
+
 sub replaceSetters {
     $pos = 0;
-    my $setterRegex = '\.%([\w\d]+) = ([^;]+);';
-    while (scanUpToPattern($setterRegex)) {
-        $scanned =~ s/\s*(.*)/$1/;
-        $_line =~ s/($scanned)$setterRegex/[$1 setValue:$3 forKey:@"$2"];/g;
+
+    while (scanUpToPattern('\.%') && scanPattern('\.%')) {
+        if (!insideString()) {
+            # Get associated variables
+            my ($key, $object, $val, $loc, $len) = scanKVCKeyAndObjectAndLengths();
+
+            if ($val) {
+                # Replace the range with the KVC setter
+                substr($_line, $loc, $len) = "[(id)$object setValue:$val forKey:$key]";
+
+                # Continue scanning from the start of the new code,
+                # as the key may contain more .% calls inside it
+                $pos = $loc;
+            } else {
+                
+            }
+        }
     }
 }
 
 sub replaceGetters {
     $pos = 0;
-    while (scanUpToPattern('\.%([\w\d]+)')) {
-        # Todo: regex escape $object and use it
-        # instead of using .{$length} in the pattern
-        my $object = scanObjectBehindCursor();
-        my $length = length($object);
-        $_line =~ s/(.{$length})\.%([\w\d]+)/[(id)$1 valueForKey:@"$2"]/;
+
+    while (scanUpToPattern('\.%') && scanPattern('\.%')) {
+        if (!insideString()) {
+            # Get associated variables
+            my ($key, $object, $val, $loc, $len) = scanKVCKeyAndObjectAndLengths();
+
+            # Replace the range with the KVC getter
+            substr($_line, $loc, $len) = "[(id)$object valueForKey:$key]";
+
+            # Continue scanning from the start of the new code,
+            # as the key may contain more .% calls inside it
+            $pos = $loc;
+        }
     }
 }
 
