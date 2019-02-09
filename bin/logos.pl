@@ -578,7 +578,7 @@ foreach my $line (@lines) {
 			foreach(@attributes) {
 				if($_ =~ /getter=(\w+)/) {
 					$getter = $1;
-				} elsif($_ =~ /setter=(\w+:)/) {
+				} elsif($_ =~ /setter=(\w+):/) {
 					$setter = $1;
 				} elsif($_ eq "assign" || $_ eq "unsafe_unretained") {
 					$assign = 1;
