@@ -613,7 +613,7 @@ foreach my $line (@lines) {
 			$property->name($name);
 
 			if(!$assign && !$retain && !$copy) {
-				fileWarning($lineno, "no 'assign', 'retain', or 'copy' attribute is specified - 'assign' is assumed");
+				# No 'assign', 'retain', or 'copy' attribute is specified - 'assign' is assumed
 				$assign = 1;
 			}
 
