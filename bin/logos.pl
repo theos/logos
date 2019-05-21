@@ -88,6 +88,14 @@ READLOOP: while(my $line = <FILE>) {
 
 	my @quotes = quotes($line);
 
+	# Delete all single-line to-EOL // xxx comments.
+	# This needs to be first so that //*something doesn't match as a /*
+	while($line =~ /\/\//g) {
+		next if fallsBetween($-[0], @quotes);
+		$line = $`;
+		redo READLOOP;
+	}
+
 	# Delete all single-line /* xxx */ comments.
 	while($line =~ /\/\*.*?\*\//g) {
 		next if fallsBetween($-[0], @quotes);
@@ -102,13 +110,6 @@ READLOOP: while(my $line = <FILE>) {
 		push(@lines, $line);
 		$readignore = 1;
 		next READLOOP;
-	}
-
-	# Delete all single-line to-EOL // xxx comments.
-	while($line =~ /\/\//g) {
-		next if fallsBetween($-[0], @quotes);
-		$line = $`;
-		redo READLOOP;
 	}
 
 	# #if 0.
