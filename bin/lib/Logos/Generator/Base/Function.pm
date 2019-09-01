@@ -34,13 +34,13 @@ sub originalFunctionCall {
 	my $args = shift;
 
 	my $return = $self->originalFunctionName($function)."(";
-	if (!$args) {
+	if (!$args and @{$function->args}[0] ne "void") {
 		$args = [];
 		for(@{$function->args}) {
 			push(@$args, $self->getArgumentName($_));
 		}
 		$return .= join(", ", @$args);
-	} else {
+	} elsif (defined($args)) {
 		$return .= $args;
 	}
 	$return .= ")";
