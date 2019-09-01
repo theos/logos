@@ -41,8 +41,8 @@ sub initRequired {
 	for(@{$self->{CLASSES}}) {
 		return 1 if $_->initRequired;
 	}
-	for(@{$self->{FUNCTIONS}}) {
-		return 1 if $_->initRequired;
+	if(scalar(@{$self->{FUNCTIONS}}) > 0) {
+		return 1;
 	}
 	return 0;
 }
