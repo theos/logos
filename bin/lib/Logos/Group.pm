@@ -104,23 +104,10 @@ sub addFunction {
 	my $self = shift;
 	my $args = shift;
 
-	my $functionRetval = undef;
-	my $functionName = undef;
-	my $functionArgs = [];
+	my $functionRetval = shift $args;
+	my $functionName = shift $args;
+	my $functionArgs = $args;
 
-	my $argIdx = 0;
-	for (@$args) {
-		if ($argIdx == 0) {
-			$argIdx++;
-			$functionRetval = $_;
-		} elsif ($argIdx == 1) {
-			$argIdx++;
-			$functionName = $_;
-		} else {
-			push(@$functionArgs, $_);
-		}
-	}
-	
 	my $function = ::Function()->new();
 	$function->retval($functionRetval);
 	$function->name($functionName);
