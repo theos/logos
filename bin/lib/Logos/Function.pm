@@ -6,6 +6,7 @@ sub new {
 	my $function = ref($proto) || $proto;
 	my $self = {};
 	$self->{NAME} = undef;
+	$self->{EXPR} = undef;
 	$self->{RETVAL} = undef;
 	$self->{ARGS} = [];
 	$self->{GROUP} = undef;
@@ -21,6 +22,14 @@ sub name {
 	my $self = shift;
 	if(@_) { $self->{NAME} = shift; }
 	return $self->{NAME};
+}
+
+sub expression {
+	my $self = shift;
+	if(@_) {
+		$self->{EXPR} = shift;
+	}
+	return $self->{EXPR};
 }
 
 sub retval {

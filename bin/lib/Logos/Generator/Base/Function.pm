@@ -3,23 +3,29 @@ use strict;
 use Logos::Generator;
 use Logos::Util;
 
-sub getLiteralOrLookupFunctionName {
+sub _initExpression {
 	my $self = shift;
-	my $name = shift;
-	return "lookup\$".substr($name, 1, -1) if (substr($name, 0, 1) eq "\"" && substr($name, -1, 1) eq "\"");
-	return $name;
+	my $function = shift;
+	return $function->expression if $function->expression;
+	return $function->name
+}
+
+sub variable {
+	my $self = shift;
+	my $function = shift;
+	return Logos::sigil("symbol").$function->group->name."\$".$function->name;
 }
 
 sub originalFunctionName {
 	my $self = shift;
 	my $function = shift;
-	return Logos::sigil("orig").$function->group->name."\$".$self->getLiteralOrLookupFunctionName($function->name);
+	return Logos::sigil("orig").$function->group->name."\$".$function->name;
 }
 
 sub newFunctionName {
 	my $self = shift;
 	my $function = shift;
-	return Logos::sigil("function").$function->group->name."\$".$self->getLiteralOrLookupFunctionName($function->name);
+	return Logos::sigil("function").$function->group->name."\$".$function->name;
 }
 
 sub originalFunctionCall {

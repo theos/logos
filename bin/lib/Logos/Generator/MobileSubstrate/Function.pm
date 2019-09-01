@@ -7,12 +7,8 @@ sub initializers {
 	my $function = shift;
 
 	my $return = "";
-	$return .= " MSHookFunction((void *)";
-	if (substr($function->name, 0, 1) eq "\"") {
-		$return .= "MSFindSymbol(NULL, ".$function->name.")";
-	} else {
-		$return .= $function->name;
-	}
+	$return .= "void * ".$self->variable($function)." = ".$self->_initExpression($function)."; ";
+	$return .= " MSHookFunction((void *)".$self->variable($function);
 	$return .= ", (void *)&".$self->newFunctionName($function);
 	$return .= ", (void **)&".$self->originalFunctionName($function);
 	$return .= ");";

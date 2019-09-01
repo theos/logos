@@ -133,4 +133,13 @@ sub addFunction {
 	return $function;
 }
 
+sub getFunctionNamed {
+	my $self = shift;
+	my $name = shift;
+	foreach(@{$self->{FUNCTIONS}}) {
+		return $_ if $_->name eq $name;
+	}
+	return undef;
+}
+
 1;

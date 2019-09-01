@@ -514,12 +514,13 @@ foreach my $line (@lines) {
 
 				my @parts = smartSplit(qr/\s*=\s*/, $arg, 2);
 				if(!defined($parts[0]) || !defined($parts[1])) {
-					fileWarning($lineno, "invalid class=expr in %init");
+					fileWarning($lineno, "invalid symbol=expr in %init");
 					next;
 				}
 
-				my $classname = $parts[0];
 				my $expr = $parts[1];
+
+				my $classname = $parts[0];
 				my $scope = "-";
 				if($classname =~ /^([+-])/) {
 					$scope = $1;
@@ -527,13 +528,20 @@ foreach my $line (@lines) {
 				}
 
 				my $class = $group->getClassNamed($classname);
-				if(!defined($class)) {
-					fileWarning($lineno, "tried to set expression for unknown class $classname in group $groupname");
+				if(defined($class)) {
+					$class->expression($expr) if $scope eq "-";
+					$class->metaexpression($expr) if $scope eq "+";
 					next;
 				}
 
-				$class->expression($expr) if $scope eq "-";
-				$class->metaexpression($expr) if $scope eq "+";
+				my $functionname = $parts[0];
+				my $function = $group->getFunctionNamed($functionname);
+				if(defined($function)) {
+					$function->expression($expr);
+					next;
+				}
+
+				fileWarning($lineno, "tried to set expression for unknown class or function $classname in group $groupname");
 			}
 
 			$group->initLine($lineno);
