@@ -397,6 +397,11 @@ foreach my $line (@lines) {
 				my $patch = Patch->new();
 				$patch->line($lineno);
 				$patch->range($patchStart, pos($line));
+				if(!defined $orig_args or length($orig_args) < 1) {
+					if(grep {$_ eq "..."} @{$currentFunction->args}) {
+						fileError($lineno, "%orig requires arguments when hooking variadic functions");
+					}
+				}
 				$patch->source(Patch::Source::Generator->new($currentFunction, 'originalFunctionCall', $orig_args));
 				addPatch($patch);
 			} else {
