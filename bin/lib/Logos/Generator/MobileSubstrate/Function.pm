@@ -7,7 +7,7 @@ sub initializers {
 	my $function = shift;
 
 	my $return = "";
-	$return .= "void * ".$self->variable($function)." = ".$self->_initExpression($function)."; ";
+	$return .= "void * ".$self->variable($function)." = ".$self->_initExpression($function).";";
 	$return .= " MSHookFunction((void *)".$self->variable($function);
 	$return .= ", (void *)&".$self->newFunctionName($function);
 	$return .= ", (void **)&".$self->originalFunctionName($function);
