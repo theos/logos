@@ -104,8 +104,8 @@ sub addFunction {
 	my $self = shift;
 	my $args = shift;
 
-	my $functionRetval = shift $args;
-	my $functionName = shift $args;
+	my $functionRetval = shift @$args;
+	my $functionName = shift @$args;
 	my $functionArgs = $args;
 
 	my $function = ::Function()->new();
