@@ -34,7 +34,11 @@ sub definition {
 	map $arglist .= ", ".Logos::Method::declarationForTypeWithName($method->argtypes->[$_], $method->argnames->[$_]), (0..$method->numArgs - 1);
 	my $functionAttributes = $self->functionAttributesForMethod($method);
 	my $return = $self->returnTypeForMethod($method);
-	my $parameters = "(".$selftype." __unused self, SEL __unused _cmd".$arglist.")";
+	my $parameters = "(".$selftype." __unused self, SEL __unused _cmd".$arglist;
+	if($method->variadic) {
+		$parameters .= ", ...";
+	}
+	$parameters .= ")";
 	$build .= "static ".Logos::Method::declarationForTypeWithName($return, $self->newFunctionName($method).$parameters).$functionAttributes;
 	return $build;
 }
@@ -72,6 +76,9 @@ sub declarations {
 		$name .= $functionAttributes."(*".$self->originalFunctionName($method).")(".$selftype.", SEL";
 		my $argtypelist = join(", ", @{$method->argtypes});
 		$name .= ", ".$argtypelist if $argtypelist;
+		if($method->variadic) {
+			$name .= ", ...";
+		}
 		$name .= ")";
 		$build .= Logos::Method::declarationForTypeWithName($self->returnTypeForMethod($method), $name);
 		$build .= ";";
@@ -86,7 +93,7 @@ sub initializers {
 	my $classvar = ($method->scope eq "+" ? $cgen->metaVariable : $cgen->variable);
 	my $r = "{ ";
 	if(!$method->isNew) {
-		$r .= Logos::sigil("register_hook") . "(" . $classvar . ", ".$self->selectorRef($method->selector).", (IMP)&".$self->newFunctionName($method).", (IMP *)&" . $self->originalFunctionName($method) . ");";
+		$r .= Logos::sigil("register_hook")."(".$classvar.", ".$self->selectorRef($method->selector).", (IMP)&".$self->newFunctionName($method).", (IMP *)&".$self->originalFunctionName($method).");";
 	} else {
 		if(!$method->type) {
 			$r .= "char _typeEncoding[1024]; unsigned int i = 0; ";
