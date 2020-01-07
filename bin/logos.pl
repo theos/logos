@@ -370,6 +370,10 @@ foreach my $line (@lines) {
 				$method->addArgument($3 ? $4 : "id", $5);
 			}
 
+			if($line =~ /\G\s*,\s*.../gc) {
+				$method->variadic(1);
+			}
+
 			$method->selectorParts(@selparts);
 			$currentClass->addMethod($method);
 			$currentMethod = $method;

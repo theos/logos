@@ -14,6 +14,7 @@ sub new {
 	$self->{ARGTYPES} = [];
 	$self->{NEW} = 0;
 	$self->{TYPE} = "";
+	$self->{VARIADIC} = 0;
 	bless($self, $class);
 	return $self;
 }
@@ -75,6 +76,12 @@ sub argnames {
 sub argtypes {
 	my $self = shift;
 	return $self->{ARGTYPES};
+}
+
+sub variadic {
+	my $self = shift;
+	if(@_) { $self->{VARIADIC} = shift; }
+	return $self->{VARIADIC};
 }
 ##### #
 # END #
