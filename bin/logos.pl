@@ -225,7 +225,7 @@ foreach my $line (@lines) {
 		$directiveDepth = 0 if(!@directiveDepthTokens);
 		$directiveDepth = $depthsForCurrentLine{join(':', @directiveDepthTokens)} if @directiveDepthTokens;
 
-		if($line =~ /\G%hook\s+([\$_\w]+)/gc) {
+		if($line =~ /\G%hook\s+([\$_\w\.]+)/gc) {
 			# "%hook <identifier>"
 			fileError($lineno, "%hook does not make sense inside a block") if($directiveDepth >= 1);
 			nestingMustNotContain($lineno, "%hook", \@nestingstack, "hook", "subclass");
@@ -234,7 +234,15 @@ foreach my $line (@lines) {
 
 			nestPush("hook", $lineno, \@nestingstack);
 
-			$currentClass = $currentGroup->addClassNamed($1);
+			my $className = $1;
+			my $expr = undef;
+			if($className =~ /\./) {
+				$expr = "objc_getClass(\"$className\")";
+				$className =~ s/\./_/g;
+			}
+
+			$currentClass = $currentGroup->addClassNamed($className);
+			$currentClass->expression($expr) if defined($expr);
 			$classes{$currentClass->name}++;
 			patchHere(undef);
 		} elsif($line =~ /\G%subclass\s+([\$_\w]+)\s*:\s*([\$_\w]+)\s*(\<\s*(.*?)\s*\>)?/gc) {
