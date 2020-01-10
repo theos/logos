@@ -236,7 +236,7 @@ foreach my $line (@lines) {
 
 			my $className = $1;
 			my $expr = undef;
-			if($className =~ /\./) {
+			if(index($className, ".") != -1 ) {
 				$expr = "objc_getClass(\"$className\")";
 				$className =~ s/\./_/g;
 			}
