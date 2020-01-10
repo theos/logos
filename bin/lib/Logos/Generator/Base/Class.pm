@@ -16,17 +16,23 @@ sub _metaInitExpression {
 	return "object_getClass(".$self->variable($class).")";
 }
 
+sub _symbolName {
+	my $self = shift;
+	my $tag = shift;
+	my $class = shift;
+	return Logos::sigil($tag, $class->group->name, $class->name);
+}
 
 sub variable {
 	my $self = shift;
 	my $class = shift;
-	return Logos::sigil("class").$class->group->name."\$".$class->name;
+	return $self->_symbolName("class", $class);
 }
 
 sub metaVariable {
 	my $self = shift;
 	my $class = shift;
-	return Logos::sigil("metaclass").$class->group->name."\$".$class->name;
+	return $self->_symbolName("metaclass", $class);
 }
 
 sub declarations {

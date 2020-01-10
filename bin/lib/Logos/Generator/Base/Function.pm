@@ -7,25 +7,32 @@ sub _initExpression {
 	my $self = shift;
 	my $function = shift;
 	return $function->expression if $function->expression;
-	return $function->name
+	return "(void *)".$function->name;
+}
+
+sub _symbolName {
+	my $self = shift;
+	my $tag = shift;
+	my $function = shift;
+	return Logos::sigil($tag, $function->group->name, $function->name);
 }
 
 sub variable {
 	my $self = shift;
 	my $function = shift;
-	return Logos::sigil("symbol").$function->group->name."\$".$function->name;
+	return $self->_symbolName("symbol", $function);
 }
 
 sub originalFunctionName {
 	my $self = shift;
 	my $function = shift;
-	return Logos::sigil("orig").$function->group->name."\$".$function->name;
+	return $self->_symbolName("orig", $function);
 }
 
 sub newFunctionName {
 	my $self = shift;
 	my $function = shift;
-	return Logos::sigil("function").$function->group->name."\$".$function->name;
+	return $self->_symbolName("function", $function);
 }
 
 sub originalFunctionCall {

@@ -11,7 +11,7 @@ use Module::Load::Conditional 'can_load';
 use Getopt::Long;
 
 package Logos;
-sub sigil { my $id = shift; return "_logos_$id\$"; }
+sub sigil { $_[0] = "_logos_".$_[0]; return join("\$", @_); }
 package main;
 
 use Logos::Util;
@@ -622,7 +622,7 @@ foreach my $line (@lines) {
 			}
 
 			my $property = Property->new();
-			$property->class($currentClass->name);
+			$property->class($currentClass);
 			$property->type($type);
 			$property->name($name);
 
@@ -652,9 +652,9 @@ foreach my $line (@lines) {
 			$property->associationPolicy($policy);
 
 			if($currentGroup) {
-				$property->group($currentGroup->name);
+				$property->group($currentGroup);
 			} else {
-				$property->group("_ungrouped");
+				$property->group($defaultGroup);
 			}
 
 			if(!$getter) {

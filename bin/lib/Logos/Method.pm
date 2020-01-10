@@ -39,11 +39,6 @@ sub return {
 	return $self->{RETURN};
 }
 
-sub groupIdentifier {
-	my $self = shift;
-	return $self->class->group->identifier;
-}
-
 sub selectorParts {
 	my $self = shift;
 	if(@_) { @{$self->{SELECTOR_PARTS}} = @_; }

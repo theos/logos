@@ -47,11 +47,6 @@ sub initRequired {
 	return 0;
 }
 
-sub identifier {
-	my $self = shift;
-	return main::sanitize($self->{NAME});
-}
-
 sub initLine {
 	my $self = shift;
 	if(@_) { $self->{INITLINE} = shift; }
