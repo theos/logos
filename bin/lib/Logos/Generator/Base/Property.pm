@@ -5,13 +5,13 @@ use Logos::Util;
 sub getterName {
 	my $self = shift;
 	my $property = shift;
-	return Logos::sigil("method").$property->group."\$".$property->class."\$".$property->getter;
+	return Logos::sigil("method", $property->group->name, $property->class->name, $property->getter);
 }
 
 sub setterName {
 	my $self = shift;
 	my $property = shift;
-	return Logos::sigil("method").$property->group."\$".$property->class."\$".$property->setter;
+	return Logos::sigil("method", $property->group->name, $property->class->name, $property->setter);
 }
 
 sub definition {
@@ -19,7 +19,7 @@ sub definition {
 	my $property = shift;
 
 	my $propertyType = $property->type;
-	my $propertyClass = $property->class;
+	my $propertyClass = $property->class->name;
 	my $propertyGetter = $property->getter;
 	my $propertyGetterName = $self->getterName($property);
 	my $propertySetter = $property->setter;
@@ -52,7 +52,7 @@ sub initializers {
 	my $self = shift;
 	my $property = shift;
 
-	my $className = Logos::sigil("class").$property->group."\$".$property->class;
+	my $className = Logos::sigil("class", $property->group->name, $property->class->name);
 	my $propertyType = $property->type;
 	my $propertyGetter = $property->getter;
 	my $propertyGetterName = $self->getterName($property);

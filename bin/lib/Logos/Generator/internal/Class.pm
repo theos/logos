@@ -5,13 +5,13 @@ use parent qw(Logos::Generator::Base::Class);
 sub superVariable {
 	my $self = shift;
 	my $class = shift;
-	return Logos::sigil("superclass").$class->group->name."\$".$class->name;
+	return Logos::sigil("superclass", $class->group->name, $class->name);
 }
 
 sub superMetaVariable {
 	my $self = shift;
 	my $class = shift;
-	return Logos::sigil("supermetaclass").$class->group->name."\$".$class->name;
+	return Logos::sigil("supermetaclass", $class->group->name, $class->name);
 }
 
 sub declarations {

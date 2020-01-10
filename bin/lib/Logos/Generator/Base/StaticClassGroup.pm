@@ -6,7 +6,7 @@ sub _methodForClassWithScope {
 	my $class = shift;
 	my $scope = shift;
 	my $return = "";
-	my $methodname = Logos::sigil($scope eq "+" ? "static_metaclass_lookup" : "static_class_lookup").$class;
+	my $methodname = Logos::sigil($scope eq "+" ? "static_metaclass_lookup" : "static_class_lookup", $class);
 	my $lookupMethod = $scope eq "+" ? "objc_getMetaClass" : "objc_getClass";
 
 	# This is a dirty assumption - we believe that we will always be using a compiler that defines __GNUC__ and respects GNU C attributes.

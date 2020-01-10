@@ -2,16 +2,25 @@ package Logos::Generator::Base::Method;
 use strict;
 use Logos::Util;
 
+sub _symbolName {
+	my $self = shift;
+	my $tag = shift;
+	my $method = shift;
+
+	my $scopeTag = ($method->scope eq "+" ? "meta_" : "").$tag;
+	return Logos::sigil($scopeTag, $method->class->group->name, $method->class->name, $method->_new_selector);
+}
+
 sub originalFunctionName {
 	my $self = shift;
 	my $method = shift;
-	return Logos::sigil(($method->scope eq "+" ? "meta_" : "")."orig").$method->groupIdentifier."\$".$method->class->name."\$".$method->_new_selector;
+	return $self->_symbolName("orig", $method);
 }
 
 sub newFunctionName {
 	my $self = shift;
 	my $method = shift;
-	return Logos::sigil(($method->scope eq "+" ? "meta_" : "")."method").$method->groupIdentifier."\$".$method->class->name."\$".$method->_new_selector;
+	return $self->_symbolName("method", $method);
 }
 
 sub definition {
