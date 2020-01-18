@@ -11,7 +11,9 @@ sub _originalMethodPointerDeclaration {
 		my $name = "(*".$self->originalFunctionName($method).")(".$classargtype.", SEL";
 		my $argtypelist = join(", ", @{$method->argtypes});
 		$name .= ", ".$argtypelist if $argtypelist;
-
+		if($method->variadic) {
+			$name .= ", ...";
+		}
 		$name .= ")";
 		$build .= Logos::Method::declarationForTypeWithName($self->returnTypeForMethod($method), $name);
 		$build .= $self->functionAttributesForMethod($method);
@@ -29,12 +31,19 @@ sub _methodPrototype {
 	my $arglist = "";
 	if($includeArgNames == 1) {
 		map $arglist .= ", ".Logos::Method::declarationForTypeWithName($method->argtypes->[$_], $method->argnames->[$_]), (0..$method->numArgs - 1);
+		if($method->variadic) {
+			$arglist .= ", ...";
+		}
 	} else {
 		my $typelist = join(", ", @{$method->argtypes});
 		$arglist = ", ".$typelist if $typelist;
 	}
 
-	my $name = $self->newFunctionName($method)."(".$classargtype.($includeArgNames?" __unused self":"").", SEL".($includeArgNames?" __unused _cmd":"").$arglist.")";
+	my $name = $self->newFunctionName($method)."(".$classargtype.($includeArgNames?" __unused self":"").", SEL".($includeArgNames?" __unused _cmd":"").$arglist;
+	if($method->variadic) {
+		$name .= ", ...";
+	}
+	$name .= ")";
 	$build .= Logos::Method::declarationForTypeWithName($self->returnTypeForMethod($method), $name);
 	$build .= $self->functionAttributesForMethod($method);
 	return $build;
@@ -79,11 +88,10 @@ sub initializers {
 	my $method = shift;
 	my $cgen = Logos::Generator::for($method->class);
 	my $classvar = ($method->scope eq "+" ? $cgen->metaVariable : $cgen->variable);
+	my $r = "{ ";
 	if(!$method->isNew) {
-		my $r = "substitute_hook_objc_message(".$classvar.", ".$self->selectorRef($method->selector).", (void *)&".$self->newFunctionName($method).", (void *)&".$self->originalFunctionName($method).", NULL);";
+		$r .= "substitute_hook_objc_message(".$classvar.", ".$self->selectorRef($method->selector).", (void *)&".$self->newFunctionName($method).", (void *)&".$self->originalFunctionName($method).", NULL);";
 	} else {
-		my $r = "";
-		$r .= "{ ";
 		if(!$method->type) {
 			$r .= "char _typeEncoding[1024]; unsigned int i = 0; ";
 			for ($method->return, "id", "SEL", @{$method->argtypes}) {
@@ -105,9 +113,9 @@ sub initializers {
 			$r .= "const char *_typeEncoding = \"".$method->type."\"; ";
 		}
 		$r .= "class_addMethod(".$classvar.", ".$self->selectorRef($method->selector).", (IMP)&".$self->newFunctionName($method).", _typeEncoding); ";
-		$r .= "}";
-		return $r;
 	}
+	$r .= "}";
+	return $r;
 }
 
 1;
