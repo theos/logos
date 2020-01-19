@@ -394,7 +394,7 @@ foreach my $line (@lines) {
 			addPatch($patch);
 		} elsif($line =~ /\G%orig\b/gc) {
 			# %orig, with optional following parens.
-			if (!defined $currentClass) {
+			if(!defined $currentClass) {
 				fileError($lineno, "%orig does not make sense outside a function") if(!defined($currentFunction));
 				my $patchStart = $-[0];
 
@@ -443,7 +443,7 @@ foreach my $line (@lines) {
 			}
 		} elsif($line =~ /\G&\s*%orig\b/gc) {
 			# &%orig, at a word boundary
-			if (!defined $currentClass) {
+			if(!defined $currentClass) {
 				fileError($lineno, "%orig does not make sense outside a function") if(!defined($currentFunction));
 				my $patchStart = $-[0];
 				my $patchEnd = $patchStart + 6;

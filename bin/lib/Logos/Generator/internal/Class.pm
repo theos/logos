@@ -38,10 +38,10 @@ sub initializers {
 	if($class->hasmetahooks) {
 		$return .= "Class ".$self->metaVariable($class)." = ".$self->_metaInitExpression($class)."; ";
 	}
-	if ($class->hasinstancehooks) {
+	if($class->hasinstancehooks) {
 		$return .= $self->superVariable($class)." = class_getSuperclass(".$self->variable($class)."); ";
 	}
-	if ($class->hasmetahooks) {
+	if($class->hasmetahooks) {
 		$return .= $self->superMetaVariable($class)." = class_getSuperclass(".$self->metaVariable($class)."); ";
 	}
 	$return .= $self->SUPER::initializers($class);

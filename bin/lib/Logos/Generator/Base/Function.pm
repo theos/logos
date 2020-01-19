@@ -41,13 +41,13 @@ sub originalFunctionCall {
 	my $args = shift;
 
 	my $return = $self->originalFunctionName($function)."(";
-	if (!$args and @{$function->args}[0] ne "void") {
+	if(!$args and @{$function->args}[0] ne "void") {
 		$args = [];
 		for(@{$function->args}) {
 			push(@$args, $self->getArgumentName($_));
 		}
 		$return .= join(", ", @$args);
-	} elsif (defined($args)) {
+	} elsif(defined($args)) {
 		$return .= $args;
 	}
 	$return .= ")";
@@ -122,7 +122,7 @@ sub notSoSmartSplit {
 	my $delimiter = shift;
 
 	# Default to commas
-	if (!$delimiter) {
+	if(!$delimiter) {
 		$delimiter = ",";
 	}
 	$argumentString .= $delimiter; #uber hax
@@ -142,9 +142,9 @@ sub notSoSmartSplit {
 	my $args = [];
 
 	foreach my $c (split //, $argumentString) {
-		if ($c eq $delimiter) {
+		if($c eq $delimiter) {
 			# If at root level, end token, push to array and start again
-			if ($parensLevel == 0 && $crotchetsLevel == 0 && $bracesLevel == 0 && $chevronsLevel == 0) {
+			if($parensLevel == 0 && $crotchetsLevel == 0 && $bracesLevel == 0 && $chevronsLevel == 0) {
 				push(@$args, $token);
 				$pc = $c;
 				$token = "";
@@ -152,36 +152,36 @@ sub notSoSmartSplit {
 			}
 		}
 
-		if ($c eq "(") {
+		if($c eq "(") {
 			$parensLevel++;
 		}
-		if ($c eq ")") {
+		if($c eq ")") {
 			$parensLevel--;
 		}
 
-		if ($c eq "[") {
+		if($c eq "[") {
 			$crotchetsLevel++;
 		}
-		if ($c eq "]") {
+		if($c eq "]") {
 			$crotchetsLevel--;
 		}
 
-		if ($c eq "{") {
+		if($c eq "{") {
 			$bracesLevel++;
 		}
-		if ($c eq "}") {
+		if($c eq "}") {
 			$bracesLevel--;
 		}
 
-		if ($c eq "<") {
+		if($c eq "<") {
 			$chevronsLevel++;
 		}
-		if ($c eq ">") {
+		if($c eq ">") {
 			$chevronsLevel--;
 		}
 
 		#skip redundant empty spaces
-		if (($pc eq $delimiter && $c eq " ") || ($pc eq " " && $c eq " ")) {
+		if(($pc eq $delimiter && $c eq " ") || ($pc eq " " && $c eq " ")) {
 			next;
 		}
 

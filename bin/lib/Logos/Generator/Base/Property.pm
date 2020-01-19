@@ -69,7 +69,7 @@ sub initializers {
 	$build .= " sprintf(_typeEncoding, \"v\@:%s\", \@encode($propertyType));";
 	$build .= " class_addMethod($className, \@selector($propertySetter:), (IMP)&$propertySetterName, _typeEncoding);";
 
-	$build .= " } ";
+	$build .= " }";
 
 	return $build;
 }

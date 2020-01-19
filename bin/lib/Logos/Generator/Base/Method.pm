@@ -6,7 +6,6 @@ sub _symbolName {
 	my $self = shift;
 	my $tag = shift;
 	my $method = shift;
-
 	my $scopeTag = ($method->scope eq "+" ? "meta_" : "").$tag;
 	return Logos::sigil($scopeTag, $method->class->group->name, $method->class->name, $method->_new_selector);
 }
@@ -34,10 +33,10 @@ sub originalCall {
 sub selectorRef {
 	my $self = shift;
 	my $selector = shift;
-	if ($selector eq "dealloc") {
-		return "sel_registerName(\"".$selector."\")";
+	if($selector eq "dealloc") {
+		return "sel_registerName(\"$selector\")";
 	}
-	return "\@selector(".$selector.")";
+	return "\@selector($selector)";
 }
 
 sub selfTypeForMethod {
@@ -59,7 +58,7 @@ sub returnTypeForMethod {
 		return $method->class->type;
 	}
 	my $result = $method->return;
-	if ($result eq "instancetype") {
+	if($result eq "instancetype") {
 		return $method->class->type;
 	}
 	return $result;

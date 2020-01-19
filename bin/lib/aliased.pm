@@ -57,7 +57,7 @@ sub _load_alias {
           ? "package $callpack; use $package;"
           : "package $callpack; use $package (\@import)";
         eval $code;
-        if ( my $error = $@ ) {
+        if( my $error = $@ ) {
             $SIG{__DIE__} = $sigdie;
             _croak($error);
         }
@@ -82,10 +82,10 @@ sub prefix {
     return sub {
         my ($name) = @_;
         my $callpack = caller(0);
-        if ( not @_ ) {
+        if( not @_ ) {
             return _load_alias( $class, $callpack );
         }
-        elsif ( @_ == 1 && defined $name ) {
+        elsif( @_ == 1 && defined $name ) {
             return _load_alias( "${class}::$name", $callpack );
         }
         else {

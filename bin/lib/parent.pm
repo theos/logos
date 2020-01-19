@@ -8,7 +8,7 @@ sub import {
 
     my $inheritor = caller(0);
 
-    if ( @_ and $_[0] eq '-norequire' ) {
+    if( @_ and $_[0] eq '-norequire' ) {
         shift @_;
     } else {
         for ( my @filename = @_ ) {

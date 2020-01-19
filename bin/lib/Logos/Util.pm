@@ -23,7 +23,7 @@ sub fallsBetween {
 	while(@_ > 0) {
 		my $start = shift;
 		my $end = shift;
-		return 1 if ($start < $idx && (!defined($end) || $end > $idx))
+		return 1 if($start < $idx && (!defined($end) || $end > $idx))
 	}
 	return 0;
 }
@@ -57,7 +57,7 @@ sub matchedParenthesisSet {
 				$pdepth++;
 			} elsif($& eq ")") {
 				$pdepth--;
-				if($pdepth == 0) { push(@parens, $+[0]); last if(!$untilend); }
+				if($pdepth == 0) { push(@parens, $+[0]); last if (!$untilend); }
 			}
 		}
 	}
@@ -98,7 +98,7 @@ sub smartSplit {
 	my @pieces = ();
 	my $piece = "";
 	while($in =~ /$re/g) {
-		next if (defined $parens[0] && fallsBetween($-[0], @parens)) || fallsBetween($-[0], @quotes);
+		next if(defined $parens[0] && fallsBetween($-[0], @parens)) || fallsBetween($-[0], @quotes);
 		$piece = substr($in, $lstart, $-[0]-$lstart);
 		push(@pieces, $piece);
 		$lstart = $+[0];
