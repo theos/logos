@@ -11,9 +11,7 @@ sub _originalMethodPointerDeclaration {
 		my $name = "(*".$self->originalFunctionName($method).")(".$classargtype.", SEL";
 		my $argtypelist = join(", ", @{$method->argtypes});
 		$name .= ", ".$argtypelist if $argtypelist;
-		if($method->variadic) {
-			$name .= ", ...";
-		}
+		$name .= ", ..." if $method->variadic;
 		$name .= ")";
 		$build .= Logos::Method::declarationForTypeWithName($self->returnTypeForMethod($method), $name);
 		$build .= $self->functionAttributesForMethod($method);
@@ -25,35 +23,48 @@ sub _originalMethodPointerDeclaration {
 sub _methodPrototype {
 	my $self = shift;
 	my $method = shift;
-	my $includeArgNames = 0 || shift;
-	my $build = "static ";
 	my $classargtype = $self->selfTypeForMethod($method);
 	my $arglist = "";
-	if($includeArgNames == 1) {
-		map $arglist .= ", ".Logos::Method::declarationForTypeWithName($method->argtypes->[$_], $method->argnames->[$_]), (0..$method->numArgs - 1);
-		if($method->variadic) {
-			$arglist .= ", ...";
-		}
-	} else {
-		my $typelist = join(", ", @{$method->argtypes});
-		$arglist = ", ".$typelist if $typelist;
-	}
-
-	my $name = $self->newFunctionName($method)."(".$classargtype.($includeArgNames?" __unused self":"").", SEL".($includeArgNames?" __unused _cmd":"").$arglist;
-	if($method->variadic) {
-		$name .= ", ...";
-	}
+	my $typelist = join(", ", @{$method->argtypes});
+	$arglist = ", ".$typelist if $typelist;
+	my $name = $self->newFunctionName($method)."(".$classargtype.", SEL".$arglist;
+	$name .= ", ..." if $method->variadic;
 	$name .= ")";
+	my $build = "static ";
 	$build .= Logos::Method::declarationForTypeWithName($self->returnTypeForMethod($method), $name);
 	$build .= $self->functionAttributesForMethod($method);
+	return $build;
+}
+
+sub originalCallParams {
+	my $self = shift;
+	my $method = shift;
+	my $customargs = shift;
+	return "" if $method->isNew;
+
+	my $build = "(self, _cmd";
+	if(defined $customargs && $customargs ne "") {
+		$build .= ", ".$customargs;
+	} elsif($method->numArgs > 0) {
+		$build .= ", ".join(", ",@{$method->argnames});
+	}
+	$build .= ")";
 	return $build;
 }
 
 sub definition {
 	my $self = shift;
 	my $method = shift;
-	my $build = "";
-	$build .= $self->_methodPrototype($method, 1);
+	my $classargtype = $self->selfTypeForMethod($method);
+	my $arglist = "";
+	map $arglist .= ", ".Logos::Method::declarationForTypeWithName($method->argtypes->[$_], $method->argnames->[$_]), (0..$method->numArgs - 1);
+	my $name = $self->newFunctionName($method);
+	my $parameters = "(".$classargtype." __unused self, SEL __unused _cmd".$arglist;
+	$parameters .= ", ..." if $method->variadic;
+	$parameters .= ")";
+	my $build = "static ";
+	$build .= Logos::Method::declarationForTypeWithName($self->returnTypeForMethod($method), $name.$parameters);
+	$build .= $self->functionAttributesForMethod($method);
 	return $build;
 }
 
@@ -63,14 +74,13 @@ sub originalCall {
 	my $customargs = shift;
 	return "" if $method->isNew;
 
-	my $build = $self->originalFunctionName($method)."(self, _cmd";
-	if(defined $customargs && $customargs ne "") {
-		$build .= ", ".$customargs;
-	} elsif($method->numArgs > 0) {
-		$build .= ", ".join(", ",@{$method->argnames});
-	}
-	$build .= ")";
+	my $build = $self->originalFunctionName($method);
+	$build .= $self->originalCallParams($method, $customargs);
 	return $build;
+}
+
+sub _hooker_function {
+	return "MSHookMessageEx";
 }
 
 sub declarations {
@@ -90,7 +100,12 @@ sub initializers {
 	my $classvar = ($method->scope eq "+" ? $cgen->metaVariable : $cgen->variable);
 	my $r = "{ ";
 	if(!$method->isNew) {
-		$r .= "MSHookMessageEx(".$classvar.", ".$self->selectorRef($method->selector).", (IMP)&".$self->newFunctionName($method).", (IMP*)&".$self->originalFunctionName($method).");";
+		$r .= $self->_hooker_function()."(";
+		$r .= $classvar;
+		$r .= ", ".$self->selectorRef($method->selector);
+		$r .= ", (IMP)&".$self->newFunctionName($method);
+		$r .= ", (IMP *)&".$self->originalFunctionName($method);
+		$r .= ");";
 	} else {
 		if(!$method->type) {
 			$r .= "char _typeEncoding[1024]; unsigned int i = 0; ";
