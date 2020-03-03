@@ -11,7 +11,7 @@ use Module::Load::Conditional 'can_load';
 use Getopt::Long;
 
 package Logos;
-sub sigil { $_[0] = "_logos_".$_[0]; return join("\$", @_); }
+sub sigil { return "_logos_".join("\$", @_); }
 package main;
 
 use Logos::Util;
