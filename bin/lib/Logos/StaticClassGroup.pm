@@ -11,6 +11,7 @@ sub new {
 	$self->{DECLAREDONLYCLASSES} = {};
 	$self->{USEDCLASSES} = {};
 	$self->{USEDMETACLASSES} = {};
+	$self->{UNESCAPEDNAMES} = {};
 	bless($self, $class);
 	return $self;
 }
@@ -18,13 +19,17 @@ sub new {
 sub addUsedClass {
 	my $self = shift;
 	my $class = shift;
+	my $unescapedClassName = shift;
 	$self->{USEDCLASSES}{$class}++;
+	$self->{UNESCAPEDNAMES}{$class} = $unescapedClassName;
 }
 
 sub addUsedMetaClass {
 	my $self = shift;
 	my $class = shift;
+	my $unescapedClassName = shift;
 	$self->{USEDMETACLASSES}{$class}++;
+	$self->{UNESCAPEDNAMES}{$class} = $unescapedClassName;
 }
 
 sub addDeclaredOnlyClass {
@@ -46,6 +51,12 @@ sub usedClasses {
 sub usedMetaClasses {
 	my $self = shift;
 	return $self->{USEDMETACLASSES};
+}
+
+sub unescapedClassNameForClass {
+	my $self = shift;
+	my $class = shift;
+	return $self->{UNESCAPEDNAMES}{$class}
 }
 
 1;

@@ -310,20 +310,25 @@ foreach my $line (@lines) {
 			}
 			$classes{$classname}++;
 			patchHere(undef);
-		} elsif($line =~ /\G%c\(\s*([+-])?([\$_\w]+)\s*\)/gc) {
+		} elsif($line =~ /\G%c\(\s*([+-])?([\$_\w\.]+)\s*\)/gc) {
 			# %c([+-]<identifier>)
 			@firstDirectivePosition = ($lineno, $-[0]) if !@firstDirectivePosition;
 
 			my $scope = $1;
 			$scope = "-" if !$scope;
-			my $classname = $2;
-			if($scope eq "+") {
-				$staticClassGroup->addUsedMetaClass($classname);
-			} else {
-				$staticClassGroup->addUsedClass($classname);
+			my $className = $2;
+			my $unescapedClassName = $2;
+			if(index($className, ".") != -1 ) {
+				fileWarning($lineno, "Dynamic lookup of Objective-C bridged Swift class $className has unintuitive behaviour and won’t catch all invocations, see https://github.com/theos/theos/wiki/Swift#tweaks for more details.");
+				$className =~ s/\./_/g;
 			}
-			$classes{$classname}++;
-			patchHere(Patch::Source::Generator->new($classname, 'classReferenceWithScope', $scope));
+			if($scope eq "+") {
+				$staticClassGroup->addUsedMetaClass($className, $unescapedClassName);
+			} else {
+				$staticClassGroup->addUsedClass($className, $unescapedClassName);
+			}
+			$classes{$className}++;
+			patchHere(Patch::Source::Generator->new($className, 'classReferenceWithScope', $scope));
 		} elsif($line =~ /\G%new(\((.*?)\))?(?=\W?)/gc) {
 			# %new[(type)]
 			nestingMustContain($lineno, "%new", \@nestingstack, "hook", "subclass");
