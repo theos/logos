@@ -49,10 +49,10 @@ sub initializers {
 	my $self = shift;
 	my $class = shift;
 	my $return = "";
-	for(@{$class->methods}) {
+	for(@{$class->properties}) {
 		$return .= Logos::Generator::for($_)->initializers;
 	}
-	for(@{$class->properties}) {
+	for(@{$class->methods}) {
 		$return .= Logos::Generator::for($_)->initializers;
 	}
 	return $return;
