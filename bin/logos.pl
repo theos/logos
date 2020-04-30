@@ -604,7 +604,7 @@ foreach my $line (@lines) {
 			my @attributes = split/\(?\s*,\s*\)?/, $1;
 			my $type = $2;
 			my $name = $3;
-			my ($assign, $retain, $copy, $nonatomic, $getter, $setter);
+			my ($assign, $retain, $copy, $nonatomic, $readonly, $getter, $setter);
 			my $numattr = 0;
 
 			foreach(@attributes) {
@@ -620,7 +620,9 @@ foreach my $line (@lines) {
 					$copy = 1;
 				} elsif($_ eq "nonatomic") {
 					$nonatomic = 1;
-				} elsif($_ =~ /readwrite|readonly|weak/) {
+				} elsif($_ eq "readonly") {
+					$readonly = 1;
+				} elsif($_ =~ /readwrite|weak|class/) {
 					fileError($lineno, "property attribute '".$_."' not supported.");
 				} else {
 					fileError($lineno, "unknown property attribute '".$_."'.");
@@ -643,6 +645,8 @@ foreach my $line (@lines) {
 			$property->class($currentClass);
 			$property->type($type);
 			$property->name($name);
+			$property->readonly($readonly);
+
 
 			if(!$assign && !$retain && !$copy) {
 				# No 'assign', 'retain', or 'copy' attribute is specified - 'assign' is assumed
@@ -668,6 +672,9 @@ foreach my $line (@lines) {
 			}
 
 			$property->associationPolicy($policy);
+			$property->retainFlag($retain);
+			$property->copyFlag($copy);
+			$property->nonatomicFlag($nonatomic);
 
 			if($currentGroup) {
 				$property->group($currentGroup);

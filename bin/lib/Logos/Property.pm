@@ -13,9 +13,13 @@ sub new {
 	$self->{GROUP} = undef;
 	$self->{NAME} = undef;
 	$self->{TYPE} = undef;
+	$self->{READONLY} = undef;
 	$self->{ASSOCIATIONPOLICY} = undef;
 	$self->{GETTER} = undef;
 	$self->{SETTER} = undef;
+	$self->{RETAIN_F} = undef;
+	$self->{COPY_F} = undef;
+	$self->{NONATOMIC_F} = undef;
 	bless($self, $class);
 	return $self;
 }
@@ -44,6 +48,12 @@ sub type {
 	return $self->{TYPE};
 }
 
+sub readonly {
+	my $self = shift;
+	if(@_) { $self->{READONLY} = shift; }
+	return $self->{READONLY};
+}
+
 sub associationPolicy {
 	my $self = shift;
 	if(@_) { $self->{ASSOCIATIONPOLICY} = shift; }
@@ -60,6 +70,24 @@ sub setter {
 	my $self = shift;
 	if(@_) { $self->{SETTER} = shift; }
 	return $self->{SETTER};
+}
+
+sub retainFlag {
+	my $self = shift;
+	if(@_) { $self->{RETAIN_F} = shift; }
+	return $self->{RETAIN_F};
+}
+
+sub copyFlag {
+	my $self = shift;
+	if(@_) { $self->{COPY_F} = shift; }
+	return $self->{COPY_F};
+}
+
+sub nonatomicFlag {
+	my $self = shift;
+	if(@_) { $self->{NONATOMIC_F} = shift; }
+	return $self->{NONATOMIC_F};
 }
 
 ##### #
