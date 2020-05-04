@@ -641,6 +641,12 @@ foreach my $line (@lines) {
 				fileError($lineno, "property attributes 'copy' and 'retain' are mutually exclusive.");
 			}
 
+			if($readonly) {
+				if($retain || $copy || $assign) {
+					fileError($lineno, "property attribute 'readonly' cannot be used with memory management attributes (assign, retain, copy).");
+				}
+			}
+
 			my $property = Property->new();
 			$property->class($currentClass);
 			$property->type($type);
