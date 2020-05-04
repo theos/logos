@@ -5,13 +5,13 @@ use Logos::Util;
 sub getterName {
 	my $self = shift;
 	my $property = shift;
-	return Logos::sigil("method", $property->group->name, $property->class->name, $property->getter);
+	return Logos::sigil("property", $property->group->name, $property->class->name, $property->getter);
 }
 
 sub setterName {
 	my $self = shift;
 	my $property = shift;
-	return Logos::sigil("method", $property->group->name, $property->class->name, $property->setter);
+	return Logos::sigil("property", $property->group->name, $property->class->name, $property->setter);
 }
 
 sub definition {
