@@ -23,8 +23,8 @@ sub addAttribute {
 	my $attrList = shift;
 	my $counter = shift;
 	my $name = shift;
-	my $value = shift // "\"\"";
-	return " $attrList [$counter++] = (objc_property_attribute_t) { \"$name\", $value };";
+	my $value = shift // '""';
+	return " ".$attrList."[$counter++] = (objc_property_attribute_t) { \"$name\", $value };";
 }
 
 sub definition {
@@ -61,9 +61,12 @@ sub definition {
 		}
 
 		return "$getter_func;\n$setter_func";
+	} else {
+		# Only add methods if not readonly. Readonly properties do not
+		# have a getter synthesized for them since ivars cannot be added.
+		# The programmer is expected to implement the getter himself.
+		return "";
 	}
-
-	return "";
 }
 
 sub initializers {
@@ -83,7 +86,7 @@ sub initializers {
 	my $propertySetter = $property->setter;
 	my $propertySetterName = $self->setterName($property);
 
-	$propertyType =~ /([^ \*]+).+/;
+	$propertyType =~ /([^ \*<]+).+/;
 	my $propertyClassName = $1;
 	
 	my $build = "{ objc_property_attribute_t _attributes[16]; unsigned int attrc = 0;";
@@ -91,21 +94,21 @@ sub initializers {
 	# Property attributes
 	if ($retain) {
 		# Type encoding of objet properties should be `@"ClassName"`
-		$build .= $self->addAttribute("_attributes", "attrc", "T", "\"@\\\"$propertyClassName\\\"\"");
-		$build .= $self->addAttribute("_attributes", "attrc", "&"); #, "\"\"");
+		$build .= $self->addAttribute("_attributes", "attrc", "T", '"@\\"'.$propertyClassName.'\\""');
+		$build .= $self->addAttribute("_attributes", "attrc", "&");
 	} else {
 		# Type encoding of non-object properties should be
 		$build .= $self->addAttribute("_attributes", "attrc", "T", "\@encode($propertyType)");
 	}
 	if ($readonly) {
-		$build .= $self->addAttribute("_attributes", "attrc", "R"); #, "\"\"");
+		$build .= $self->addAttribute("_attributes", "attrc", "R");
 	}
 
 	if ($copy) {
-		$build .= $self->addAttribute("_attributes", "attrc", "C"); #, "\"\"");
+		$build .= $self->addAttribute("_attributes", "attrc", "C");
 	}
 	if ($nonatomic) {
-		$build .= $self->addAttribute("_attributes", "attrc", "N"); #, "\"\"");
+		$build .= $self->addAttribute("_attributes", "attrc", "N");
 	}
 
 	# class_addProperty
