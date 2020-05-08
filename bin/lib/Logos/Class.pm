@@ -25,12 +25,15 @@ sub new {
 ##################### #
 # Setters and Getters #
 # #####################
+
+# Such as 'UIView'
 sub name {
 	my $self = shift;
 	if(@_) { $self->{NAME} = shift; }
 	return $self->{NAME};
 }
 
+# Such as a call to objc_getClass
 sub expression {
 	my $self = shift;
 	if(@_) {
@@ -50,6 +53,7 @@ sub metaexpression {
 	return $self->{METAEXPR};
 }
 
+# Such as 'UIView *'
 sub type {
 	my $self = shift;
 	if(@_) { $self->{TYPE} = shift; }
