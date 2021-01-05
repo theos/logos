@@ -785,7 +785,7 @@ if(@firstDirectivePosition) {
 		}
 		$above = $lines[$line-1] if !defined $above;
 
-		last if $depth == 0 && $above =~ /^\s*$/;
+		last if $depth == 0 && ($above =~ /^\s*$/ || $above =~ /^\s*([#\@]import|#include)\s/);
 
 		$line-- if($pos == 0);
 		$pos = 0;
