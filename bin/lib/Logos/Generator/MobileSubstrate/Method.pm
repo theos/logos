@@ -31,9 +31,6 @@ sub _methodPrototype {
 	my $arglist = "";
 	if($includeArgNames == 1) {
 		map $arglist .= ", ".Logos::Method::declarationForTypeWithName($method->argtypes->[$_], $method->argnames->[$_]), (0..$method->numArgs - 1);
-		if($method->variadic) {
-			$arglist .= ", ...";
-		}
 	} else {
 		my $typelist = join(", ", @{$method->argtypes});
 		$arglist = ", ".$typelist if $typelist;
