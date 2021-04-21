@@ -60,7 +60,7 @@ sub definition {
 			$setter_func .= "{ objc_setAssociatedObject(self, (void *)$propertyGetterName, rawValue, $propertyAssociationPolicy); }";
 		}
 
-		return "$getter_func;\n$setter_func";
+		return "$getter_func\n$setter_func";
 	} else {
 		# Only add methods if not readonly. Readonly properties do not
 		# have a getter synthesized for them since ivars cannot be added.
