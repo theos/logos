@@ -15,7 +15,7 @@ sub preamble {
 	if ($skipIncludes) {
 		return $self->SUPER::preamble();
 	} else {
-		return join("\n", ($self->SUPER::preamble(), "#include <substrate.h>"));
+		return join("\n", ($self->SUPER::preamble(), "#include <substrate.h>\n#include <libhooker.h>\n#include <dlfcn.h>"));
 	}
 }
 

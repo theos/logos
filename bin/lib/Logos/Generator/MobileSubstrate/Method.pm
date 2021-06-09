@@ -90,7 +90,7 @@ sub initializers {
 	my $classvar = ($method->scope eq "+" ? $cgen->metaVariable : $cgen->variable);
 	my $r = "{ ";
 	if(!$method->isNew) {
-		$r .= "MSHookMessageEx(".$classvar.", ".$self->selectorRef($method->selector).", (IMP)&".$self->newFunctionName($method).", (IMP*)&".$self->originalFunctionName($method).");";
+		$r .= "LOGOS_HOOK_FUNC(".$classvar.", ".$self->selectorRef($method->selector).", (IMP)&".$self->newFunctionName($method).", (IMP*)&".$self->originalFunctionName($method).");";
 	} else {
 		if(!$method->type) {
 			$r .= "char _typeEncoding[1024]; unsigned int i = 0; ";
