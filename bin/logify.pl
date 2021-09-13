@@ -53,10 +53,10 @@ sub logLineForDeclaration {
 	my $rtype = $1;
 	my $innards = "%log; ";
 	if($rtype ne "void") {
-		$innards .= "$rtype r = %orig; ";
 		if ($rtype eq "instancetype") {
-			$innards .= "id r = %orig; ";
+			$rtype = "id";
 		}
+		$innards .= "$rtype r = %orig; ";
 		
 		$innards .= "NSLog(@\" = ".Logos::Method::formatCharForArgType($rtype)."\", ".Logos::Method::printArgForArgType($rtype, "r")."); " if defined Logos::Method::printArgForArgType($rtype, "r");
 		$innards .= "return r; ";
