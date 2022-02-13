@@ -237,7 +237,7 @@ foreach my $line (@lines) {
 			my $className = $1;
 			my $expr = undef;
 			if(index($className, ".") != -1 ) {
-				fileWarning($lineno, "Hooking Objective-C bridged Swift class $className has unintuitive behaviour and won’t catch all invocations, see https://github.com/theos/theos/wiki/Swift#tweaks for more details.");
+				fileWarning($lineno, "Hooking Objective-C bridged Swift class $className has unintuitive behaviour and won’t catch all invocations, see https://theos.dev/docs/swift for more details.");
 				$expr = "objc_getClass(\"$className\")";
 				$className =~ s/\./_/g;
 			}
@@ -319,7 +319,7 @@ foreach my $line (@lines) {
 			my $className = $2;
 			my $unescapedClassName = $2;
 			if(index($className, ".") != -1 ) {
-				fileWarning($lineno, "Dynamic lookup of Objective-C bridged Swift class $className has unintuitive behaviour and won’t catch all invocations, see https://github.com/theos/theos/wiki/Swift#tweaks for more details.");
+				fileWarning($lineno, "Dynamic lookup of Objective-C bridged Swift class $className has unintuitive behaviour and won’t catch all invocations, see https://theos.dev/docs/swift for more details.");
 				$className =~ s/\./_/g;
 			}
 			if($scope eq "+") {
