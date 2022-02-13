@@ -1,9 +1,9 @@
 # Logos
-Logos is a Perl regex-based preprocessor that simplifies the boilerplate code needed to create hooks for Objective-C methods and C functions with an elegant Objective-C-like syntax. It’s most commonly used along with the [Theos](https://theos.github.io/) build system, which was originally developed to create jailbreak tweaks. Logos was once integrated in the same Git repo as Theos, but now has been decoupled from Theos to its own repo.
+Logos is a Perl regex-based preprocessor that simplifies the boilerplate code needed to create hooks for Objective-C methods and C functions with an elegant Objective-C-like syntax. It’s most commonly used along with the [Theos](https://theos.dev/docs/) build system, which was originally developed to create jailbreak tweaks. Logos was once integrated in the same Git repo as Theos, but now has been decoupled from Theos to its own repo.
 
-Logos aims to provide an interface for [Cydia Substrate](https://cydiasubstrate.com/) by default, but can be configured to directly use the Objective-C runtime.
+Logos aims to provide an interface for [Cydia Substrate](http://cydiasubstrate.com/) by default, but can be configured to directly use the Objective-C runtime.
 
-Documentation is available on the [Logos page](http://iphonedevwiki.net/index.php/Logos) of iPhone Dev Wiki. 
+Documentation is available on the [Logos Syntax](https://theos.dev/docs/logos-syntax), [Logify](https://theos.dev/docs/logify.pl), and [File Extensions](https://theos.dev/docs/logos-file-extensions) pages of [theos.dev](https://theos.dev/docs/).
 
 ## Example
 ### Source file: Tweak.x
@@ -14,7 +14,8 @@ Documentation is available on the [Logos page](http://iphonedevwiki.net/index.ph
 	return [%orig stringByAppendingString:@" (of doom)"];
 }
 
-%new - (void)helloWorld {
+%new
+- (void)helloWorld {
 	NSLog(@"Awesome!");
 }
 
