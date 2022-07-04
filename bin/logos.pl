@@ -600,6 +600,11 @@ foreach my $line (@lines) {
 
 			$currentClass->hasinstancehooks(1);
 
+			# check %property for attributes
+			if (!defined $1 || $1 eq '') {
+				fileError($lineno, "%property declaration is missing attributes (e.g., nonatomic, retain, etc)");
+			}
+
 			# check property attribute validity
 			my @attributes = split/\(?\s*,\s*\)?/, $1;
 			my $type = $2;
