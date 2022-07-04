@@ -1,12 +1,12 @@
 #!/usr/bin/env perl
 # logify.pl
 ############
-# Converts an Objective-C header file (or anything containing a @interface and method definitions)
-#+into a Logos input file which causes all function calls to be logged.
+# Converts an Objective-C header file (or anything containing an @interface and method definitions)
+# into a Logos input file which causes all function calls to be logged.
 #
 # Accepts input on stdin or via filename specified on the commandline.
 
-# Lines are only processed if we were in an @interface, so you can run this on a file containing
+# Lines are only processed if we're in an @interface, so you can run this on a file containing
 # an @implementation, as well.
 use strict;
 
@@ -18,6 +18,8 @@ use Logos::Util;
 $Logos::Util::errorhandler = sub {
 	die "$ARGV:$.: error: missing closing parenthesis$/"
 };
+
+die "Usage: $FindBin::Script <filename>\n" if (@ARGV == 0 && -t STDIN);
 
 my $interface = 0;
 while(my $line = <>) {
