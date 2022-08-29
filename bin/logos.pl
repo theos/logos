@@ -544,6 +544,7 @@ foreach my $line (@lines) {
 				my $expr = $parts[1];
 
 				my $classname = $parts[0];
+				$classname =~ s/^\s+//;
 				my $scope = "-";
 				if($classname =~ /^([+-])/) {
 					$scope = $1;
