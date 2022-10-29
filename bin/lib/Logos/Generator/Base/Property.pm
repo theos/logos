@@ -118,13 +118,14 @@ sub initializers {
 	# have a getter synthesized for them since ivars cannot be added.
 	# The programmer is expected to implement the getter himself.
 	if (!$readonly) {
-		$build .= " char _typeEncoding[1024];";
+		$build .= " size_t _nBytes = 1024;";
+		$build .= " char _typeEncoding[_nBytes];";
 		# Getter
-		$build .= " sprintf(_typeEncoding, \"%s\@:\", \@encode($propertyType));";
+		$build .= " snprintf(_typeEncoding, _nBytes, \"%s\@:\", \@encode($propertyType));";
 		$build .= " class_addMethod($logosClassVar, \@selector($propertyGetter), (IMP)&$propertyGetterName, _typeEncoding);";
 
 		# Setter
-		$build .= " sprintf(_typeEncoding, \"v\@:%s\", \@encode($propertyType));";
+		$build .= " snprintf(_typeEncoding, _nBytes, \"v\@:%s\", \@encode($propertyType));";
 		$build .= " class_addMethod($logosClassVar, \@selector($propertySetter:), (IMP)&$propertySetterName, _typeEncoding);";
 	}
 
