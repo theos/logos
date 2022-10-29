@@ -121,7 +121,7 @@ sub initializers {
 		$build .= " size_t _nBytes = 1024;";
 		$build .= " char _typeEncoding[_nBytes];";
 		# Getter
-		$build .= " snprintf(_typeEncoding, _nBytes,\"%s\@:\", \@encode($propertyType));";
+		$build .= " snprintf(_typeEncoding, _nBytes, \"%s\@:\", \@encode($propertyType));";
 		$build .= " class_addMethod($logosClassVar, \@selector($propertyGetter), (IMP)&$propertyGetterName, _typeEncoding);";
 
 		# Setter
