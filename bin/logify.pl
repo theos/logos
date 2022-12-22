@@ -11,6 +11,7 @@
 use strict;
 
 use FindBin;
+use Getopt::Long;
 use lib "$FindBin::RealBin/lib";
 
 use Logos::Method;
@@ -19,7 +20,25 @@ $Logos::Util::errorhandler = sub {
 	die "$ARGV:$.: error: missing closing parenthesis$/"
 };
 
-die "Usage: $FindBin::Script <filename>\n" if (@ARGV == 0 && -t STDIN);
+my $script = $FindBin::Script;
+my $usage = <<"EOF";
+Usage: $script [options] filename ...
+Options:
+  [-f|--filter]	Comma-separated list of methods to 'logify'
+  [-h|--help]	Display this page
+EOF
+
+die "Usage: $script <filename>\nRun $script --help for more details\n" if (@ARGV == 0 && -t STDIN);
+
+my ($opt_filter, $opt_help);
+GetOptions(
+	"filter|f=s" 	=> \$opt_filter,
+	"help|h"		=> \$opt_help,
+);
+if ($opt_help) {
+	print $usage;
+	exit 0;
+}
 
 my $interface = 0;
 while(my $line = <>) {
