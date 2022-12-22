@@ -29,15 +29,34 @@ use aliased 'Logos::Function';
 
 use Logos::Generator;
 
-%main::CONFIG = ( generator => "MobileSubstrate",
-		  warnings => "default",
-		);
+%main::CONFIG = (
+	generator => "MobileSubstrate",
+	warnings => "default",
+);
 $main::warnings = 0;
 
-GetOptions("config|c=s" => \%main::CONFIG);
+my $script = $FindBin::Script;
+my $usage = <<"EOF";
+Usage: $script [options] filename ...
+Options:
+  [-c|--config]		Modify Logos' configuration (MobileSubstrate, default)
+     -c generator=[base|MobileSubstrate|internal|libhooker]
+     -c warnings=[default|error|none]
+  [-h|--help]		Display this page
+EOF
+
+my $opt_help;
+GetOptions(
+	"config|c=s" 	=> \%main::CONFIG,
+	"help|h"     	=> \$opt_help,
+);
+if ($opt_help) {
+	print $usage;
+	exit 0;
+}
 
 my $filename = $ARGV[0];
-die "Syntax: $FindBin::Script filename\n" if !$filename;
+die "Usage: $script [options] <filename>\nRun $script --help for more details\n" if !$filename;
 open(FILE, $filename) or die "Could not open $filename.\n";
 
 my @lines = ();
