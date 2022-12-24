@@ -80,12 +80,22 @@ sub logLineForDeclaration {
 	# if user only wants specific
 	# methods logified, find those
 	if (defined $opt_filter) {
-		# split array if comma separated (TODO)
 		# remove anything within paranthesis (inclusive)
 		(my $str = $declaration) =~ s/\([^()]*\)//g;
 
-		# if the desired method and current method have params
-		if ($opt_filter =~ /:/ && $str =~ /:/) {
+		my @filters = ($opt_filter);
+
+		# multiple methods passed
+		if ($opt_filter =~ /,/) {
+			# remove filter str
+			pop(@filters);
+
+			# reassign as individual filters
+			@filters = split(',',$opt_filter);
+		}
+
+		# if the desired method(s) and current method have params
+		if (grep(/:/, @filters) && $str =~ /:/) {
 			# append space after colons
 			$str =~ s/:/: /g;
 
@@ -100,8 +110,14 @@ sub logLineForDeclaration {
 			$str = substr($str, 2);
 		}
 
-		# check to see if we've got it
-		if ($opt_filter ne $str) {
+		block: {
+			foreach my $filter (@filters) {
+				# check to see if we've got it
+				if ($filter eq $str) {
+					last block;
+				}
+			}
+			# nope
 			return "";
 		}
 	}
