@@ -25,22 +25,27 @@ my $script = $FindBin::Script;
 my $usage = <<"EOF";
 Usage: $script [options] filename ...
 Options:
-  [-f|--filter]	Comma-separated list of methods to 'logify'
-     -f "launchedTaskWithLaunchPath:arguments:,arguments" (for example)
-  [-h|--help]	Display this page
+  [-e|--exclude]	Comma-separated list of methods to exclude
+	 -e "launchedTaskWithLaunchPath:arguments:,arguments" (for example)
+  [-f|--filter]		Comma-separated list of methods to exclude
+	 -f "launchedTaskWithLaunchPath:arguments:,arguments" (for example)
+  [-h|--help]		Display this page
 EOF
 
 die "Usage: $script <filename>\nRun $script --help for more details\n" if (@ARGV == 0 && -t STDIN);
 
-my ($opt_filter, $opt_help);
+my ($opt_exclude, $opt_filter, $opt_help);
 GetOptions(
+	"exclude|e=s" 	=> \$opt_exclude,
 	"filter|f=s" 	=> \$opt_filter,
-	"help|h"		=> \$opt_help,
+	"help|h"	=> \$opt_help,
 );
 if ($opt_help) {
 	print $usage;
 	exit 0;
 }
+
+die "Error: --filter and --exclude are mutually exclusive\nRun $script --help for more details\n" if (defined $opt_exclude && defined $opt_filter);
 
 my $interface = 0;
 while (my $line = <>) {
@@ -78,23 +83,30 @@ sub logLineForDeclaration {
 	my $declaration = shift;
 	$declaration =~ m/^[+-]\s*\((.*?)\).*?/;
 
-	# if user only wants specific
-	# methods logified, find those
-	if (defined $opt_filter) {
+	# if user only wants specific methods logified,
+	# either find those or exclude ones specified
+	if (defined $opt_exclude || defined $opt_filter) {
 		# remove anything within paranthesis (inclusive)
 		(my $str = $declaration) =~ s/\([^()]*\)//g;
 		# remove method type from start of method
 		$str =~ s/[^[:alnum:]:\s]//g;
 
-		my @filters = ($opt_filter);
+		my $opt;
+		if (defined $opt_exclude){
+			$opt = $opt_exclude;
+		} else {
+			$opt = $opt_filter;
+		}
+
+		my @filters = ($opt);
 
 		# multiple methods passed
-		if ($opt_filter =~ /,/) {
+		if ($opt =~ /,/) {
 			# remove filter str
 			pop(@filters);
 
 			# reassign as individual filters
-			@filters = split(',',$opt_filter);
+			@filters = split(',', $opt);
 		}
 
 		# if the desired method(s) and current method have params
@@ -103,7 +115,7 @@ sub logLineForDeclaration {
 			$str =~ s/:/: /g;
 
 			# split array at space
-			my @arr = split(' ',$str);
+			my @arr = split(' ', $str);
 			# remove elements w/o a colon
 			@arr = grep(/:/, @arr);
 			# make string from remaining bits
@@ -117,12 +129,17 @@ sub logLineForDeclaration {
 		block: {
 			foreach my $filter (@filters) {
 				# check to see if we've got it
-				if ($filter eq $str) {
+				if (defined $opt_exclude && $filter eq $str) {
+					return "";
+				}
+				elsif ($filter eq $str) {
 					last block;
 				}
 			}
-			# nope
-			return "";
+			if(defined $opt_filter){
+				# nope
+				return "";
+			}
 		}
 	}
 
