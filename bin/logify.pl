@@ -5,9 +5,10 @@
 # into a Logos input file which causes all function calls to be logged.
 #
 # Accepts input on stdin or via filename specified on the commandline.
-
+#
 # Lines are only processed if we're in an @interface, so you can run this on a file containing
 # an @implementation, as well.
+############
 use strict;
 
 use FindBin;
@@ -41,28 +42,32 @@ if ($opt_help) {
 }
 
 my $interface = 0;
-while(my $line = <>) {
-	if($line =~ m/^[+-]\s*\((.*?)\).*?(?=;)/ && $interface == 1) {
+while (my $line = <>) {
+	if ($line =~ m/^[+-]\s*\((.*?)\).*?(?=;)/ && $interface == 1) {
+		# regular methods
 		print logLineForDeclaration($&);
-	} elsif($line =~ m/^\s*\@property\s*\((.*?)\)\s*(.*?)\b([\$a-zA-Z_][\$_a-zA-Z0-9]*)(?=;)/ && $interface == 1) {
+	} elsif ($line =~ m/^\s*\@property\s*\((.*?)\)\s*(.*?)\b([\$a-zA-Z_][\$_a-zA-Z0-9]*)(?=;)/ && $interface == 1) {
+		# properties (setter/getter)
 		my @attributes = smartSplit(qr/\s*,\s*/, $1);
 		my $propertyName = $3;
 		my $type = $2;
 		my $readonly = scalar(grep(/readonly/, @attributes));
 		my %methods = ("setter" => "set".ucfirst($propertyName).":", "getter" => $propertyName);
 		foreach my $attribute (@attributes) {
-			next if($attribute !~ /=/);
+			next if ($attribute !~ /=/);
 			my @x = smartSplit(qr/\s*=\s*/, $attribute);
 			$methods{$x[0]} = $x[1];
 		}
-		if($readonly == 0) {
+		if ($readonly == 0) {
 			print logLineForDeclaration("- (void)".$methods{"setter"}."($type)$propertyName");
 		}
 		print logLineForDeclaration("- ($type)".$methods{"getter"});
-	} elsif($line =~ m/^\@interface\s+(.*?)\s*[:(]/ && $interface == 0) {
+	} elsif ($line =~ m/^\@interface\s+(.*?)\s*[:(]/ && $interface == 0) {
+		# start (%Hook)
 		print "%hook $1\n";
 		$interface = 1;
-	} elsif($line =~ m/^\@end/ && $interface == 1) {
+	} elsif ($line =~ m/^\@end/ && $interface == 1) {
+		# end (%end)
 		print "%end\n";
 		$interface = 0;
 	}
@@ -71,9 +76,39 @@ while(my $line = <>) {
 sub logLineForDeclaration {
 	my $declaration = shift;
 	$declaration =~ m/^[+-]\s*\((.*?)\).*?/;
+
+	# if user only wants specific
+	# methods logified, find those
+	if (defined $opt_filter) {
+		# split array if comma separated (TODO)
+		# remove anything within paranthesis (inclusive)
+		(my $str = $declaration) =~ s/\([^()]*\)//g;
+
+		# if the desired method and current method have params
+		if ($opt_filter =~ /:/ && $str =~ /:/) {
+			# append space after colons
+			$str =~ s/:/: /g;
+
+			# split array at space
+			my @arr = split(' ',$str);
+			# remove elements w/o a colon
+			@arr = grep(/:/, @arr);
+			# make string from remaining bits
+			$str = join('', @arr);
+		} else {
+			# remove "-/+ " from method
+			$str = substr($str, 2);
+		}
+
+		# check to see if we've got it
+		if ($opt_filter ne $str) {
+			return "";
+		}
+	}
+
 	my $rtype = $1;
 	my $innards = "%log; ";
-	if($rtype ne "void") {
+	if ($rtype ne "void") {
 		if ($rtype eq "instancetype") {
 			$rtype = "id";
 		}
@@ -83,5 +118,6 @@ sub logLineForDeclaration {
 	} else {
 		$innards .= "%orig; ";
 	}
+
 	return "$declaration { $innards}\n";
 }
