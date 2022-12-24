@@ -86,7 +86,7 @@ sub logLineForDeclaration {
 	# if user only wants specific methods logified,
 	# either find those or exclude ones specified
 	if (defined $opt_exclude || defined $opt_filter) {
-		# remove anything within paranthesis (inclusive)
+		# remove anything within parenthesis (inclusive)
 		(my $str = $declaration) =~ s/\([^()]*\)//g;
 		# remove method type from start of method
 		$str =~ s/[^[:alnum:]:\s]//g;
