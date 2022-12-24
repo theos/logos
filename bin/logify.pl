@@ -26,6 +26,7 @@ my $usage = <<"EOF";
 Usage: $script [options] filename ...
 Options:
   [-f|--filter]	Comma-separated list of methods to 'logify'
+     -f "launchedTaskWithLaunchPath:arguments:,arguments" (for example)
   [-h|--help]	Display this page
 EOF
 
@@ -82,6 +83,8 @@ sub logLineForDeclaration {
 	if (defined $opt_filter) {
 		# remove anything within paranthesis (inclusive)
 		(my $str = $declaration) =~ s/\([^()]*\)//g;
+		# remove method type from start of method
+		$str =~ s/[^[:alnum:]:\s]//g;
 
 		my @filters = ($opt_filter);
 
@@ -105,10 +108,11 @@ sub logLineForDeclaration {
 			@arr = grep(/:/, @arr);
 			# make string from remaining bits
 			$str = join('', @arr);
-		} else {
-			# remove "-/+ " from method
-			$str = substr($str, 2);
 		}
+
+		# strip any remaining whitespace
+		# (kept it around earlier for the split)
+		$str =~ s/\s//g;
 
 		block: {
 			foreach my $filter (@filters) {
