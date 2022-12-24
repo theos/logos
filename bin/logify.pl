@@ -136,7 +136,7 @@ sub logLineForDeclaration {
 					last block;
 				}
 			}
-			if(defined $opt_filter){
+			if (defined $opt_filter) {
 				# nope
 				return "";
 			}
