@@ -107,7 +107,7 @@ sub logLineForDeclaration {
 sub shouldLogDeclaration {
 	# remove anything within parenthesis (inclusive)
 	(my $str = shift) =~ s/\([^()]*\)//g;
-	# remove method type from start of method
+	# remove instance/class method prefix
 	$str =~ s/[^[:alnum:]:\s]//g;
 
 	my $opt = $opt_include;
@@ -131,16 +131,17 @@ sub shouldLogDeclaration {
 		# append space after colons
 		$str =~ s/:/: /g;
 
-		# split array at space
+		# split method at space
 		my @arr = split(' ', $str);
-		# remove elements w/o a colon
+		# remove bits w/o a colon
+		# (e.g., parameter names)
 		@arr = grep(/:/, @arr);
 		# make string from remaining bits
 		$str = join('', @arr);
 	}
 
 	# strip any remaining whitespace
-	# (kept it around earlier for the split)
+	# (kept around earlier for the split)
 	$str =~ s/\s//g;
 
 	# check to see if we've got a match
