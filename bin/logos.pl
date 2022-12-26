@@ -40,7 +40,7 @@ my $usage = <<"EOF";
 Usage: $script [options] <filename>
 Options:
   [-c|--config]		Modify Logos' configuration (MobileSubstrate, default)
-     -c generator=[base|MobileSubstrate|internal|libhooker]
+     -c generator=[internal|libhooker|MobileSubstrate]
      -c warnings=[default|error|none]
   [-h|--help]		Display this page
 EOF
