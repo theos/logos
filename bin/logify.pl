@@ -111,20 +111,11 @@ sub shouldLogDeclaration {
 	$str =~ s/[^[:alnum:]:\s]//g;
 
 	my $opt = $opt_include;
-	if (defined $opt_exclude) {
-		$opt = $opt_exclude;
-	}
+	$opt = $opt_exclude if (defined $opt_exclude);
 
 	my @filters = ($opt);
-
 	# multiple methods passed
-	if ($opt =~ /,/) {
-		# remove filter str
-		pop(@filters);
-
-		# reassign as individual filters
-		@filters = split(',', $opt);
-	}
+	@filters = split(',', $opt) if ($opt =~ /,/);
 
 	# if the desired method(s) and current method have params
 	if (grep(/:/, @filters) && $str =~ /:/) {
