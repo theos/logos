@@ -25,19 +25,19 @@ my $script = $FindBin::Script;
 my $usage = <<"EOF";
 Usage: $script [options] filename ...
 Options:
+  [-i|--include]	Comma-separated list of methods to include
+	 -i "launchedTaskWithLaunchPath:arguments:,arguments" (for example)
   [-e|--exclude]	Comma-separated list of methods to exclude
 	 -e "launchedTaskWithLaunchPath:arguments:,arguments" (for example)
-  [-f|--filter]		Comma-separated list of methods to exclude
-	 -f "launchedTaskWithLaunchPath:arguments:,arguments" (for example)
   [-h|--help]		Display this page
 EOF
 
 die "Usage: $script <filename>\nRun $script --help for more details\n" if (@ARGV == 0 && -t STDIN);
 
-my ($opt_exclude, $opt_filter, $opt_help);
+my ($opt_include, $opt_exclude, $opt_help);
 GetOptions(
+	"include|i=s" 	=> \$opt_include,
 	"exclude|e=s" 	=> \$opt_exclude,
-	"filter|f=s" 	=> \$opt_filter,
 	"help|h"	=> \$opt_help,
 );
 if ($opt_help) {
@@ -45,7 +45,7 @@ if ($opt_help) {
 	exit 0;
 }
 
-die "Error: --filter and --exclude are mutually exclusive\nRun $script --help for more details\n" if (defined $opt_exclude && defined $opt_filter);
+die "Error: --include and --exclude are mutually exclusive\nRun $script --help for more details\n" if (defined $opt_include && defined $opt_exclude);
 
 my $interface = 0;
 while (my $line = <>) {
@@ -85,17 +85,17 @@ sub logLineForDeclaration {
 
 	# if user only wants specific methods logified,
 	# either find those or exclude ones specified
-	if (defined $opt_exclude || defined $opt_filter) {
+	if (defined $opt_include || defined $opt_exclude) {
 		# remove anything within parenthesis (inclusive)
 		(my $str = $declaration) =~ s/\([^()]*\)//g;
 		# remove method type from start of method
 		$str =~ s/[^[:alnum:]:\s]//g;
 
 		my $opt;
-		if (defined $opt_exclude){
-			$opt = $opt_exclude;
+		if (defined $opt_include){
+			$opt = $opt_include;
 		} else {
-			$opt = $opt_filter;
+			$opt = $opt_exclude;
 		}
 
 		my @filters = ($opt);
@@ -136,7 +136,7 @@ sub logLineForDeclaration {
 					last block;
 				}
 			}
-			if (defined $opt_filter) {
+			if (defined $opt_include) {
 				# nope
 				return "";
 			}
