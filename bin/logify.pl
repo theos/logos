@@ -83,64 +83,9 @@ sub logLineForDeclaration {
 	my $declaration = shift;
 	$declaration =~ m/^[+-]\s*\((.*?)\).*?/;
 
-	# if user only wants specific methods logified,
-	# either find those or exclude ones specified
-	if (defined $opt_include || defined $opt_exclude) {
-		# remove anything within parenthesis (inclusive)
-		(my $str = $declaration) =~ s/\([^()]*\)//g;
-		# remove method type from start of method
-		$str =~ s/[^[:alnum:]:\s]//g;
-
-		my $opt;
-		if (defined $opt_include){
-			$opt = $opt_include;
-		} else {
-			$opt = $opt_exclude;
-		}
-
-		my @filters = ($opt);
-
-		# multiple methods passed
-		if ($opt =~ /,/) {
-			# remove filter str
-			pop(@filters);
-
-			# reassign as individual filters
-			@filters = split(',', $opt);
-		}
-
-		# if the desired method(s) and current method have params
-		if (grep(/:/, @filters) && $str =~ /:/) {
-			# append space after colons
-			$str =~ s/:/: /g;
-
-			# split array at space
-			my @arr = split(' ', $str);
-			# remove elements w/o a colon
-			@arr = grep(/:/, @arr);
-			# make string from remaining bits
-			$str = join('', @arr);
-		}
-
-		# strip any remaining whitespace
-		# (kept it around earlier for the split)
-		$str =~ s/\s//g;
-
-		block: {
-			foreach my $filter (@filters) {
-				# check to see if we've got it
-				if (defined $opt_exclude && $filter eq $str) {
-					return "";
-				}
-				elsif ($filter eq $str) {
-					last block;
-				}
-			}
-			if (defined $opt_include) {
-				# nope
-				return "";
-			}
-		}
+	if ((defined $opt_include || defined $opt_exclude) && !shouldLogDeclaration($declaration)) {
+		# line != $opt_include || line == $opt_exclude
+		return "";
 	}
 
 	my $rtype = $1;
@@ -157,4 +102,64 @@ sub logLineForDeclaration {
 	}
 
 	return "$declaration { $innards}\n";
+}
+
+sub shouldLogDeclaration {
+	# remove anything within parenthesis (inclusive)
+	(my $str = shift) =~ s/\([^()]*\)//g;
+	# remove method type from start of method
+	$str =~ s/[^[:alnum:]:\s]//g;
+
+	my $opt;
+	if (defined $opt_include){
+		$opt = $opt_include;
+	} else {
+		$opt = $opt_exclude;
+	}
+
+	my @filters = ($opt);
+
+	# multiple methods passed
+	if ($opt =~ /,/) {
+		# remove filter str
+		pop(@filters);
+
+		# reassign as individual filters
+		@filters = split(',', $opt);
+	}
+
+	# if the desired method(s) and current method have params
+	if (grep(/:/, @filters) && $str =~ /:/) {
+		# append space after colons
+		$str =~ s/:/: /g;
+
+		# split array at space
+		my @arr = split(' ', $str);
+		# remove elements w/o a colon
+		@arr = grep(/:/, @arr);
+		# make string from remaining bits
+		$str = join('', @arr);
+	}
+
+	# strip any remaining whitespace
+	# (kept it around earlier for the split)
+	$str =~ s/\s//g;
+
+	# check to see if we've got a match
+	foreach my $filter (@filters) {
+		if (defined $opt_exclude && $filter eq $str) {
+			# don't logify
+			return;
+		} elsif ($filter eq $str) {
+			# do logify
+			return 1;
+		}
+	}
+
+	# cases when no filter matched
+	if (defined $opt_include) {
+		return;
+	} else {
+		return 1;
+	}
 }
