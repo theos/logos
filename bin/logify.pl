@@ -110,10 +110,8 @@ sub shouldLogDeclaration {
 	# remove method type from start of method
 	$str =~ s/[^[:alnum:]:\s]//g;
 
-	my $opt;
-	if (defined $opt_include){
-		$opt = $opt_include;
-	} else {
+	my $opt = $opt_include;
+	if (defined $opt_exclude) {
 		$opt = $opt_exclude;
 	}
 
@@ -157,9 +155,9 @@ sub shouldLogDeclaration {
 	}
 
 	# cases when no filter matched
-	if (defined $opt_include) {
-		return;
-	} else {
+	if (defined $opt_exclude) {
 		return 1;
+	} else {
+		return;
 	}
 }
