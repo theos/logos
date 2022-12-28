@@ -69,11 +69,9 @@ while (my $line = <>) {
 		}
 		print logLineForDeclaration("- ($type)".$methods{"getter"});
 	} elsif ($line =~ m/^\@interface\s+(.*?)\s*[:(]/ && $interface == 0) {
-		# start (%Hook)
 		print "%hook $1\n";
 		$interface = 1;
 	} elsif ($line =~ m/^\@end/ && $interface == 1) {
-		# end (%end)
 		print "%end\n";
 		$interface = 0;
 	}
@@ -114,7 +112,7 @@ sub shouldLogDeclaration {
 	$opt = $opt_exclude if (defined $opt_exclude);
 
 	my @filters = ($opt);
-	# multiple methods passed
+	# if multiple methods passed
 	@filters = split(',', $opt) if ($opt =~ /,/);
 
 	# if the desired method(s) and current method have params
@@ -122,12 +120,10 @@ sub shouldLogDeclaration {
 		# append space after colons
 		$str =~ s/:/: /g;
 
-		# split method at space
 		my @arr = split(' ', $str);
 		# remove bits w/o a colon
 		# (e.g., parameter names)
 		@arr = grep(/:/, @arr);
-		# make string from remaining bits
 		$str = join('', @arr);
 	}
 
