@@ -1,0 +1,55 @@
+name: CI Tests
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+      - '*'
+
+jobs:
+  test:
+    env:
+      # some plugins still needs this to run their tests...
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, macos-latest, windows-latest]
+        perl-version:
+          - '5.36'
+          # - '5.34'
+          # - '5.32'
+          # - '5.30'
+          # - '5.28'
+          # - '5.26'
+          # - '5.24'
+          # - '5.22'
+          # - '5.20'
+          # - '5.18'
+          # - '5.16'
+          # - '5.14'
+          # - '5.12'
+          # - '5.10'
+          # - '5.8'
+
+    runs-on: ${{matrix.runner}}
+    name: OS ${{matrix.runner}} Perl ${{matrix.perl-version}}
+
+    container:
+      image: perldocker/perl-tester:${{matrix.perl-version}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          cpanm --notest Test::PerlTidy
+
+      - name: Run tests
+        run: |
+          prove tests/
