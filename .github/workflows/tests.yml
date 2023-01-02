@@ -1,13 +1,6 @@
 name: CI Tests
 
-on:
-  push:
-    branches:
-      - '*'
-  pull_request:
-    branches:
-      - '*'
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   test:
@@ -34,9 +27,6 @@ jobs:
           - '5.18'
           - '5.16'
           - '5.14'
-          - '5.12'
-          - '5.10'
-          - '5.8'
 
     runs-on: ubuntu-latest
     name: Perl ${{matrix.perl-version}} on Ubuntu
