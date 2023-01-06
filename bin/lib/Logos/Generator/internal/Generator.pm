@@ -19,10 +19,8 @@ sub preamble {
 
 sub staticDeclarations {
 	my $self = shift;
-	my $declarations = (
-		$self->SUPER::staticDeclarations(),
-	#<<< Prevent perltidy from reformatting this section for readability, otherwise the strings are not indented.
-	"__attribute__((unused)) static void ".Logos::sigil("register_hook")."(Class _class, SEL _cmd, IMP _new, IMP *_old) {",
+	return join("\n", ($self->SUPER::staticDeclarations(),
+		"__attribute__((unused)) static void ".Logos::sigil("register_hook")."(Class _class, SEL _cmd, IMP _new, IMP *_old) {",
 		"unsigned int _count, _i;",
 		"Class _searchedClass = _class;",
 		"Method *_methods;",
@@ -43,10 +41,7 @@ sub staticDeclarations {
 			"free(_methods);",
 			"_searchedClass = class_getSuperclass(_searchedClass);",
 		"}",
-	"}"
-	#>>>
-	);
-	return join("\n", $declarations);
+	"}"));
 }
 
 1;
