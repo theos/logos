@@ -297,6 +297,16 @@ foreach my $line (@lines) {
 		} elsif($line =~ /\G%group\s+([\$_\w]+)/gc) {
 			# %group <identifier>
 			fileError($lineno, "%group does not make sense inside a block") if($directiveDepth >= 1);
+
+			# find any hooks in the current nestingstack
+			my(@indexes) = grep { $nestingstack[$_] =~ /hook/ } 0..$#nestingstack;
+			foreach my $i (@indexes) {
+				# grab line number for each hook and check
+				# against the current lineno of the %group(s)
+				(my $hookno = $nestingstack[$i]) =~ s/\D//g;
+				fileError($lineno, "%group does not make sense inside a hook") if($hookno < $lineno);
+			}
+
 			nestingMustNotContain($lineno, "%group", \@nestingstack, "group");
 
 			@firstDirectivePosition = ($lineno, $-[0]) if !@firstDirectivePosition;
