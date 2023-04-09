@@ -110,7 +110,8 @@ READLOOP: while(my $line = <FILE>) {
 	# Delete all single-line to-EOL // xxx comments.
 	# This needs to be first so that //*something doesn't match as a /*
 	while($line =~ /\/\//g) {
-		next if fallsBetween($-[0], @quotes);
+		# If // is part of a single-line /**/ comment, skip and handle below
+		next if ($line =~ /^.*?\*\/\s*/ || fallsBetween($-[0], @quotes));
 		$line = $`;
 		redo READLOOP;
 	}
