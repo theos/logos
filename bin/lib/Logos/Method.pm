@@ -197,6 +197,7 @@ sub formatCharForArgType {
 	# Objects
 	return "%@" if /^instancetype$/; # instancetype is an objc_object.
 	return "%@" if /^id$/; # id is an objc_object.
+	return "%@" if /^*\(\^\).*$/; # blocks are objc_objects (matches non-typedef blocks).
 	return "%@" if /^\w+\s*\*$/; # try to treat *any* other pointer as an objc_object.
 	return "%@" if /^\w+Ref$/; # *Ref can be printed with %@.
 
