@@ -48,15 +48,16 @@ if ($opt_help) {
 die "Error: --include and --exclude are mutually exclusive\nRun $script --help for more details\n" if (defined $opt_include && defined $opt_exclude);
 
 my $interface = 0;
+my @loggedMethods;
 while (my $line = <>) {
 	if ($line =~ m/^[+-]\s*\((.*?)\).*?(?=;)/ && $interface == 1) {
 		# regular methods
-		print logLineForDeclaration($&);
+		print logLineForDeclaration($&) if (!isLogged($&));
 	} elsif ($line =~ m/^\s*\@property\s*\((.*?)\)\s*(.*?)\b([\$a-zA-Z_][\$_a-zA-Z0-9]*)(?=;)/ && $interface == 1) {
 		# properties (setter/getter)
 		my @attributes = smartSplit(qr/\s*,\s*/, $1);
 		my $propertyName = $3;
-		my $type = $2;
+		(my $type = $2) =~ s/\s+$//;
 		my $readonly = scalar(grep(/readonly/, @attributes));
 		my %methods = ("setter" => "set".ucfirst($propertyName).":", "getter" => $propertyName);
 		foreach my $attribute (@attributes) {
@@ -65,15 +66,27 @@ while (my $line = <>) {
 			$methods{$x[0]} = $x[1];
 		}
 		if ($readonly == 0) {
-			print logLineForDeclaration("- (void)".$methods{"setter"}."($type)$propertyName");
+			my $setter = "- (void)".$methods{"setter"}."($type)$propertyName";
+			print logLineForDeclaration($setter) if (!isLogged($setter));
 		}
-		print logLineForDeclaration("- ($type)".$methods{"getter"});
+		my $getter = "- ($type)".$methods{"getter"};
+		print logLineForDeclaration($getter) if (!isLogged($getter));
 	} elsif ($line =~ m/^\@interface\s+(.*?)\s*[:(]/ && $interface == 0) {
 		print "%hook $1\n";
 		$interface = 1;
 	} elsif ($line =~ m/^\@end/ && $interface == 1) {
 		print "%end\n";
 		$interface = 0;
+	}
+}
+
+sub isLogged {
+	(my $str = shift) =~ s/\s//g;
+	if (!@loggedMethods || !grep($str eq $_, @loggedMethods)) {
+		push(@loggedMethods, $str);
+		return;
+	} else {
+		return 1;
 	}
 }
 
