@@ -58,10 +58,7 @@ sub originalCall {
 		$classref = $cgen->superVariable;
 	}
 	my $argtypelist = join(", ", @{$method->argtypes});
-	my $pointerType = "(*)(".$classargtype.", SEL";
-	$pointerType .=       ", ".$argtypelist if $argtypelist;
-	$pointerType .=   ")";
-	return "(".$self->originalFunctionName($method)." ? ".$self->originalFunctionName($method)." : (__typeof__(".$self->originalFunctionName($method)."))class_getMethodImplementation(".$classref.", ".$self->selectorRef($method->selector)."))".$self->originalCallParams($method, $customargs);
+	return $self->originalFunctionName($method).$self->originalCallParams($method, $customargs);
 }
 
 sub declarations {
