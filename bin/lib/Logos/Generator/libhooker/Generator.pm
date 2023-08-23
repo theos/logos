@@ -15,7 +15,7 @@ sub preamble {
 	if ($skipIncludes) {
 		return $self->SUPER::preamble();
 	} else {
-		return join("\n", ($self->SUPER::preamble(), "\@import libhooker.libblackjack;\n\@import ObjectiveC.runtime;"));
+		return join("\n", ($self->SUPER::preamble(), "#import <libhooker/libblackjack.h>\n#import <objc/runtime.h>"));
 	}
 }
 
