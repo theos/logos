@@ -19,4 +19,12 @@ sub preamble {
 	}
 }
 
+sub staticDeclarations {
+    my $self = shift;
+    return join("\n", ($self->SUPER::staticDeclarations(),
+        "asm(\".linker_option \\\"-lhooker\\\"\");",
+        "asm(\".linker_option \\\"-lblackjack\\\"\");"
+    ));
+}
+
 1;
