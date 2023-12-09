@@ -11,7 +11,7 @@ sub initializers {
 	}
 	my @structs = map { Logos::Generator::for($_)->initializers } @{$group->functions};
 	my $functionCount = @{$group->functions};
-	$return .= "LHHookFunctions(".join(",", @structs).", ".$functionCount.");";
+	$return .= "LHHookFunctions((struct LHFunctionHook []){".join(",", @structs)."}, ".$functionCount.");";
 	$return .= "}";
 	return $return;
 }
