@@ -10,8 +10,10 @@ sub initializers {
 		$return .= Logos::Generator::for($_)->initializers if $_->initRequired;
 	}
 	my @structs = map { Logos::Generator::for($_)->initializers } @{$group->functions};
-	my $functionCount = @{$group->functions};
-	$return .= "LHHookFunctions((struct LHFunctionHook []){".join(",", @structs)."}, ".$functionCount.");";
+	if(@structs) {
+		my $functionCount = @{$group->functions};
+		$return .= "LHHookFunctions((struct LHFunctionHook []){".join(",", @structs)."}, ".$functionCount.");";
+	}
 	$return .= "}";
 	return $return;
 }
