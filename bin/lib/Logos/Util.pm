@@ -12,8 +12,10 @@ sub _defaultErrorHandler {
 sub quotes {
 	my ($line) = @_;
 	my @quotes = ();
-	while($line =~ /(?<!\\)[\"\']/g) {
-		push(@quotes, $-[0]);
+	# Ignore escaped quotes
+	# Match anything within TWO of the same quote type (' or ")
+	while($line =~ /(?<!\\)(["'])(.*?)(?<!\\)\1/g) {
+		push(@quotes, $-[0], $+[0]);
 	}
 	return @quotes;
 }
