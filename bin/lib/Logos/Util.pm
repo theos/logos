@@ -13,7 +13,7 @@ sub quotes {
 	my ($line) = @_;
 	my @quotes = ();
 	# Ignore escaped quotes
-	# Matches anything within TWO of the same quote type (' or ")
+	# Match anything within TWO of the same quote type (' or ")
 	while($line =~ /(?<!\\)(["'])(.*?)(?<!\\)\1/g) {
 		push(@quotes, $-[0], $+[0]);
 	}
