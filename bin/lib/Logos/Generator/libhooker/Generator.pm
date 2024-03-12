@@ -15,8 +15,20 @@ sub preamble {
 	if ($skipIncludes) {
 		return $self->SUPER::preamble();
 	} else {
-		return join("\n", ($self->SUPER::preamble(), "#import <libhooker/libblackjack.h>\n#import <objc/runtime.h>"));
+		return join("\n", ($self->SUPER::preamble(),
+			"#import <libhooker/libblackjack.h>",
+			"#import <objc/runtime.h>"
+		));
 	}
+}
+
+sub staticDeclarations {
+	my $self = shift;
+	return join("\n", ($self->SUPER::staticDeclarations(),
+		"asm(\".linker_option \\\"-lhooker\\\"\");",
+		"asm(\".linker_option \\\"-lblackjack\\\"\");",
+		"" # extra line break for readability
+	));
 }
 
 1;
