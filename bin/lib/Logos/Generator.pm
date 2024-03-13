@@ -1,7 +1,9 @@
 package Logos::Generator;
 use strict;
+use File::Basename;
 use Logos::Generator::Thunk;
 use Scalar::Util qw(blessed);
+use List::Util qw(any);
 use Module::Load::Conditional qw(can_load);
 $Module::Load::Conditional::VERBOSE = 1;
 our $GeneratorPackage = "";
@@ -40,9 +42,20 @@ sub use {
 		unshift @INC, $2;
 	}
 	$GeneratorPackage = "Logos::Generator::".$generatorName;
-	::fileError(-1, "I can't find the $generatorName Generator!") if(!can_load(modules => {
-				$GeneratorPackage."::Generator" => undef
-			}));
+	::fileError(-1, "I can't find the '$generatorName' Generator!") if (!can_load(modules => {
+		$GeneratorPackage . "::Generator" => undef
+	}));
+
+	# Guard against case insensitive filesystems finding the module but not being able to load it
+	my @availableGeneratorPaths = glob(dirname(__FILE__) . "/Generator/*");
+	my @availableGenerators = map {basename($_)} @availableGeneratorPaths;
+	my $generatorDirectoryExists = any {$_ eq $generatorName} @availableGenerators;
+
+	if ($generatorDirectoryExists != 1) {
+		my %generatorNames = map {lc($_) => $_} @availableGenerators;
+		my $possibleGeneratorName = $generatorNames{lc($generatorName)};
+		::fileError(-1, "I can't find the '$generatorName' Generator, did you mean '$possibleGeneratorName'?");
+	}
 }
 
 1;
