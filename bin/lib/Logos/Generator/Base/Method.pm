@@ -1,6 +1,7 @@
 package Logos::Generator::Base::Method;
 use strict;
 use Logos::Util;
+use parent qw(Logos::Generator::Base::Common);
 
 sub _symbolName {
 	my $self = shift;
