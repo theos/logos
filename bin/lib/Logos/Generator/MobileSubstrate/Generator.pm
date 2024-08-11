@@ -19,4 +19,12 @@ sub preamble {
 	}
 }
 
+sub staticDeclarations {
+	my $self = shift;
+	return join("\n", ($self->SUPER::staticDeclarations(),
+		"asm(\".linker_option \\\"-framework\\\", \\\"CydiaSubstrate\\\"\");",
+		"" # extra line break for readability
+	));
+}
+
 1;
