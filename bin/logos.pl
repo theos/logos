@@ -458,6 +458,10 @@ foreach my $line (@lines) {
 				} else {
 					fileError($lineno, "Invalid argument structure in %orig");
 				}
+				
+				if ($orig_args =~ /%orig\b/) {
+					fileError($lineno, "%orig cannot be referenced in %orig arguments");
+				}
 			}
 
 			if (!defined $currentClass) {
