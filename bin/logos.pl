@@ -458,9 +458,9 @@ foreach my $line (@lines) {
 				} else {
 					fileError($lineno, "Invalid argument structure in %orig");
 				}
-				
-				if ($orig_args =~ /%orig\b/) {
-					fileError($lineno, "%orig cannot be referenced in %orig arguments");
+
+				if ($orig_args =~ /%orig\b/ || $orig_args =~ /%log\b/) {
+					fileError($lineno, "Logos cannot be used within arguments to %orig");
 				}
 			}
 
