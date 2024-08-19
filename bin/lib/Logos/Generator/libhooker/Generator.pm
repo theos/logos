@@ -25,8 +25,8 @@ sub preamble {
 sub staticDeclarations {
 	my $self = shift;
 	return join("\n", ($self->SUPER::staticDeclarations(),
-		"asm(\".linker_option \\\"-lhooker\\\"\");",
-		"asm(\".linker_option \\\"-lblackjack\\\"\");",
+		"__asm__(\".linker_option \\\"-lhooker\\\"\");",
+		"__asm__(\".linker_option \\\"-lblackjack\\\"\");",
 		"" # extra line break for readability
 	));
 }
