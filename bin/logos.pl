@@ -429,22 +429,47 @@ foreach my $line (@lines) {
 			addPatch($patch);
 		} elsif($line =~ /\G%orig\b/gc) {
 			# %orig, with optional following parens.
+
+			my $patchStart = $-[0];
+			my $remaining = substr($line, pos($line));
+			my $orig_args = undef;
+			my $full_code = $remaining;
+			my $paren_depth = ($full_code =~ tr/(//) - ($full_code =~ tr/)//);
+			my $brace_depth = ($full_code =~ tr/{//) - ($full_code =~ tr/}//);
+			my $line_index = $lineno;
+			my $has_semicolon = 1;
+			
+			if($line =~ /\G\s*\(/gc) {
+				while ($paren_depth > 0 || $brace_depth > 0) {
+					$line_index++;
+					last unless defined $lines[$line_index];
+					$full_code .= "\n" . $lines[$line_index];
+					$paren_depth += ($lines[$line_index] =~ tr/(//) - ($lines[$line_index] =~ tr/)//);
+					$brace_depth += ($lines[$line_index] =~ tr/{//) - ($lines[$line_index] =~ tr/}//);
+				}
+
+				$has_semicolon = $full_code =~ /;\s*$/;
+				if ($has_semicolon) {
+					$full_code =~ s/;\s*$//;
+				}
+
+				if ($full_code =~ /^\s*\((.*)\)\s*$/s) {
+					$orig_args = $1;
+				} else {
+					fileError($lineno, "Invalid argument structure in %orig");
+				}
+
+				if ($orig_args =~ /%orig\b/ || $orig_args =~ /%log\b/) {
+					fileError($lineno, "Logos cannot be used within arguments to %orig");
+				}
+			}
+
 			if (!defined $currentClass) {
 				fileError($lineno, "%orig does not make sense outside a function") if(!defined($currentFunction));
-				my $patchStart = $-[0];
-
-				my $remaining = substr($line, pos($line));
-				my $orig_args = undef;
-
-				my ($popen, $pclose) = matchedParenthesisSet($remaining);
-				if(defined $popen) {
-					$orig_args = substr($remaining, $popen, $pclose-$popen-1);;
-					pos($line) = pos($line) + $pclose;
-				}
 
 				my $patch = Patch->new();
 				$patch->line($lineno);
-				$patch->range($patchStart, pos($line));
+				$patch->range($patchStart, length($line));
 				if(!defined $orig_args or length($orig_args) < 1) {
 					if(grep {$_ eq "..."} @{$currentFunction->args}) {
 						fileError($lineno, "%orig requires arguments when hooking variadic functions");
@@ -452,30 +477,39 @@ foreach my $line (@lines) {
 				}
 				$patch->source(Patch::Source::Generator->new($currentFunction, 'originalFunctionCall', $orig_args));
 				addPatch($patch);
+
+				for (my $i = 1; $i <= $line_index - $lineno; $i++) {
+					my $patch = Patch->new();
+					$patch->line($lineno + $i);
+					$patch->range(0, length($lines[$lineno + $i]));
+					$patch->source(Patch::Source::Generator->new($currentFunction, 'deleteLine'));
+					addPatch($patch);
+				}
 			} else {
 				nestingMustContain($lineno, "%orig", \@nestingstack, "hook", "subclass");
 				fileError($lineno, "%orig does not make sense outside a method") if(!defined($currentMethod));
 				fileError($lineno, "%orig does not make sense outside a block") if($directiveDepth < 1);
 				fileWarning($lineno, "%orig in new method ".prettyPrintMethod($currentMethod)." will be non-operative.") if $currentMethod->isNew;
 
-				my $patchStart = $-[0];
-
-				my $remaining = substr($line, pos($line));
-				my $orig_args = undef;
-
-				my ($popen, $pclose) = matchedParenthesisSet($remaining);
-				if(defined $popen) {
-					$orig_args = substr($remaining, $popen, $pclose-$popen-1);;
-					pos($line) = pos($line) + $pclose;
-				}
-
 				my $capturedMethod = $currentMethod;
 				my $patch = Patch->new();
 				$patch->line($lineno);
-				$patch->range($patchStart, pos($line));
+				$patch->range($patchStart, length($line));
 				$patch->source(Patch::Source::Generator->new($capturedMethod, 'originalCall', $orig_args));
 				addPatch($patch);
+
+				for (my $i = 1; $i <= $line_index - $lineno; $i++) {
+					my $patch = Patch->new();
+					$patch->line($lineno + $i);
+					$patch->range(0, length($lines[$lineno + $i]));
+					$patch->source(Patch::Source::Generator->new($capturedMethod, 'deleteLine'));
+					addPatch($patch);
+				}
 			}
+
+			$line .= ";" if $has_semicolon;
+			pos($line) = length($line);
+
 		} elsif($line =~ /\G&\s*%orig\b/gc) {
 			# &%orig, at a word boundary
 			if (!defined $currentClass) {
