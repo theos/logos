@@ -26,6 +26,7 @@ use aliased 'Logos::Subclass';
 use aliased 'Logos::StaticClassGroup';
 use aliased 'Logos::Property';
 use aliased 'Logos::Function';
+use aliased 'Logos::KVC';
 
 use Logos::Generator;
 
@@ -879,6 +880,7 @@ for(@sortedPatches) {
 
 splice(@lines, 0, 0, generateLineDirectiveForPhysicalLine(0)) if !$preprocessed;
 foreach my $oline (@lines) {
+	$oline = Logos::KVC::processKVC($oline);
 	print $oline."\n" if defined($oline);
 }
 
