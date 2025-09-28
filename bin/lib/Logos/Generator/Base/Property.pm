@@ -118,7 +118,7 @@ sub initializers {
 	# have a getter synthesized for them since ivars cannot be added.
 	# The programmer is expected to implement the getter himself.
 	if (!$readonly) {
-		$build .= " size_t _nBytes = 1024;";
+		$build .= " const size_t _nBytes = 1024;";
 		$build .= " char _typeEncoding[_nBytes];";
 		# Getter
 		$build .= " snprintf(_typeEncoding, _nBytes, \"%s\@:\", \@encode($propertyType));";
