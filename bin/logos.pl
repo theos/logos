@@ -147,6 +147,7 @@ READLOOP: while(my $line = <FILE>) {
 					$line =~ /^\s*(%new.*?)?\s*([+-])\s*\(\s*(.*?)\s*\)/
 					|| $line =~ /%orig[^;]*$/
 					|| $line =~ /%init[^;]*$/
+					|| $line =~ /%hookf\b[^;]*$/
 				)
 				&& index($line, "{") < $-[0] && index($line, ";") < $-[0]) {
 			if(fallsBetween($-[0], @quotes)) {
