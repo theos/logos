@@ -432,13 +432,14 @@ foreach my $line (@lines) {
 			# %orig, with optional following parens.
 
 			my $patchStart = $-[0];
+			my $patchEnd = pos($line);
 			my $remaining = substr($line, pos($line));
 			my $orig_args = undef;
 			my $full_code = $remaining;
 			my $paren_depth = ($full_code =~ tr/(//) - ($full_code =~ tr/)//);
 			my $brace_depth = ($full_code =~ tr/{//) - ($full_code =~ tr/}//);
 			my $line_index = $lineno;
-			my $has_semicolon = 1;
+			my $has_semicolon = 0;
 			
 			if($line =~ /\G\s*\(/gc) {
 				while ($paren_depth > 0 || $brace_depth > 0) {
@@ -449,15 +450,20 @@ foreach my $line (@lines) {
 					$brace_depth += ($lines[$line_index] =~ tr/{//) - ($lines[$line_index] =~ tr/}//);
 				}
 
-				$has_semicolon = $full_code =~ /;\s*$/;
-				if ($has_semicolon) {
-					$full_code =~ s/;\s*$//;
-				}
-
-				if ($full_code =~ /^\s*\((.*)\)\s*$/s) {
-					$orig_args = $1;
+				if ($line_index == $lineno) { # single-line %orig
+					my ($popen, $pclose) = matchedParenthesisSet($remaining);
+					fileError($lineno, "Invalid argument structure in %orig") unless defined $popen;
+					$orig_args = substr($remaining, $popen, $pclose - $popen - 1);
+					$patchEnd += $pclose;
 				} else {
-					fileError($lineno, "Invalid argument structure in %orig");
+					$patchEnd = length($line);
+					$has_semicolon = $full_code =~ /;\s*$/;
+					$full_code =~ s/;\s*$// if $has_semicolon;
+					if ($full_code =~ /^\s*\((.*)\)\s*$/s) {
+						$orig_args = $1;
+					} else {
+						fileError($lineno, "Invalid argument structure in %orig");
+					}
 				}
 
 				if ($orig_args =~ /%orig\b/ || $orig_args =~ /%log\b/) {
@@ -470,7 +476,7 @@ foreach my $line (@lines) {
 
 				my $patch = Patch->new();
 				$patch->line($lineno);
-				$patch->range($patchStart, length($line));
+				$patch->range($patchStart, $patchEnd);
 				if(!defined $orig_args or length($orig_args) < 1) {
 					if(grep {$_ eq "..."} @{$currentFunction->args}) {
 						fileError($lineno, "%orig requires arguments when hooking variadic functions");
@@ -495,7 +501,7 @@ foreach my $line (@lines) {
 				my $capturedMethod = $currentMethod;
 				my $patch = Patch->new();
 				$patch->line($lineno);
-				$patch->range($patchStart, length($line));
+				$patch->range($patchStart, $patchEnd);
 				$patch->source(Patch::Source::Generator->new($capturedMethod, 'originalCall', $orig_args));
 				addPatch($patch);
 
