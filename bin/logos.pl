@@ -436,8 +436,8 @@ foreach my $line (@lines) {
 			my $remaining = substr($line, pos($line));
 			my $orig_args = undef;
 			my $full_code = $remaining;
-			my $paren_depth = ($full_code =~ tr/(//) - ($full_code =~ tr/)//);
-			my $brace_depth = ($full_code =~ tr/{//) - ($full_code =~ tr/}//);
+			my $paren_depth = depthOutsideQuotes($full_code, '(', ')');
+			my $brace_depth = depthOutsideQuotes($full_code, '{', '}');
 			my $line_index = $lineno;
 			my $has_semicolon = 0;
 			
@@ -446,8 +446,8 @@ foreach my $line (@lines) {
 					$line_index++;
 					last unless defined $lines[$line_index];
 					$full_code .= "\n" . $lines[$line_index];
-					$paren_depth += ($lines[$line_index] =~ tr/(//) - ($lines[$line_index] =~ tr/)//);
-					$brace_depth += ($lines[$line_index] =~ tr/{//) - ($lines[$line_index] =~ tr/}//);
+					$paren_depth = depthOutsideQuotes($full_code, '(', ')');
+					$brace_depth = depthOutsideQuotes($full_code, '{', '}');
 				}
 
 				if ($line_index == $lineno) { # single-line %orig
@@ -466,7 +466,9 @@ foreach my $line (@lines) {
 					}
 				}
 
-				if ($orig_args =~ /%orig\b/ || $orig_args =~ /%log\b/) {
+				my @arg_quotes = quotes($orig_args);
+				while ($orig_args =~ /%(?:orig|log)\b/g) {
+					next if fallsBetween($-[0], @arg_quotes);
 					fileError($lineno, "Logos cannot be used within arguments to %orig");
 				}
 			}
@@ -514,8 +516,12 @@ foreach my $line (@lines) {
 				}
 			}
 
-			$line .= ";" if $has_semicolon;
-			pos($line) = length($line);
+			if ($has_semicolon) {
+				$line .= ";";
+				pos($line) = length($line);
+			} else {
+				pos($line) = $patchEnd;
+			}
 
 		} elsif($line =~ /\G&\s*%orig\b/gc) {
 			# &%orig, at a word boundary
@@ -1108,6 +1114,17 @@ sub patchHere {
 sub addPatch {
 	my $patch = shift;
 	push @patches, $patch;
+}
+
+sub depthOutsideQuotes {
+	my ($text, $open, $close) = @_;
+	my @q = quotes($text);
+	my $depth = 0;
+	while ($text =~ /\Q$open\E|\Q$close\E/g) {
+		next if fallsBetween($-[0], @q);
+		$depth += ($& eq $open) ? 1 : -1;
+	}
+	return $depth;
 }
 
 sub prettyPrintMethod {
